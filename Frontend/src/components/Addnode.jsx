@@ -15,14 +15,19 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
                 isVisible={true} // Bounding layout handles stay rendered permanently
                 minWidth={150}
                 minHeight={80}
-                lineClassName="!border-black !border-2" 
-                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white" 
-                
+                lineClassName="!border-black !border-2"
+                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white"
+                onResize={(event, params) => {
+                    useDiagramStore.getState().onNodeResize(id, {
+                        width: params.width,
+                        height: params.height
+                    });
+                }}
             />
 
             {/* FLUID INNER WRAPPER CELL */}
             <div className="w-full h-full p-4 pb-12 border-4 border-black bg-white shadow-[4px_4px_0px_0px_#000000] font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-center justify-center text-center">
-                
+
                 {/* 🔴 OMNIDIRECTIONAL CONTEXT PORTS */}
                 {/* TOP WALL PORTS */}
                 <Handle type="target" position={Position.Top} id="t-top" className="!bg-black !w-2 !h-2 !rounded-none !left-[35%] !top-[-6px] z-40" />
@@ -67,22 +72,35 @@ const defaultEdgeOptions = {
 };
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
+// Inside src/components/Addnode.jsx -> Main Addnode component wrapper:
+
 const Addnode = () => {
-    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteAll, deleteEdge } = useDiagramStore()
+    // 🔥 Pull 'autoLayout' right out of your state store hook properties
+    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteAll, deleteEdge, autoLayout } = useDiagramStore()
 
     const nodeTypes = useMemo(() => ({ brutalNode: CustomBrutalistNode }), [])
 
     return (
         <div className="w-full h-full relative">
 
-            {/* Master Clear Button */}
-            <button
-                onClick={deleteAll}
-                className="absolute top-4 left-4 z-50 text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
-            >
-                Clear Canvas ✕
-            </button>
+            {/* CONTROL HUB OVERLAY WRAPPER */}
+            <div className="absolute top-4 left-4 z-50 flex flex-col sm:flex-row gap-3">
+                {/* Master Clear Button */}
+                <button
+                    onClick={deleteAll}
+                    className="text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
+                >
+                    Clear Canvas ✕
+                </button>
 
+                {/* ✨ THE AUTO-ARRANGEMENT USP TRIGGER */}
+                <button
+                    onClick={autoLayout}
+                    className="text-xs font-black uppercase tracking-wider bg-cyan-300 text-black border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
+                >
+                    Auto Arrange ✨
+                </button>
+            </div>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -90,12 +108,16 @@ const Addnode = () => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+
+                // ⚡ THE VIEWPORT BINDING: Saves the canvas instance controller reference directly inside our Zustand store state tracker
+                onInit={(instance) => useDiagramStore.getState().setReactFlowInstance(instance)}
+
                 onEdgeClick={(event, edge) => {
-                    deleteEdge(edge.id); // Triggers snap deletion on edge line single mouse clicks
+                    deleteEdge(edge.id);
                 }}
                 defaultEdgeOptions={defaultEdgeOptions}
-                fitView
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
+                fitView
             >
                 <Background color="#000000" gap={16} opacity={0.15} />
                 <Controls className="!border-2 !border-black !shadow-none !rounded-none" />
