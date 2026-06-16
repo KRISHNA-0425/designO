@@ -17,6 +17,7 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
                 minHeight={80}
                 lineClassName="!border-black !border-2" 
                 handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white" 
+                
             />
 
             {/* FLUID INNER WRAPPER CELL */}
@@ -94,6 +95,7 @@ const Addnode = () => {
                 }}
                 defaultEdgeOptions={defaultEdgeOptions}
                 fitView
+                className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
             >
                 <Background color="#000000" gap={16} opacity={0.15} />
                 <Controls className="!border-2 !border-black !shadow-none !rounded-none" />
