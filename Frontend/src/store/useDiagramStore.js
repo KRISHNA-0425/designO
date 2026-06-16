@@ -2,15 +2,9 @@ import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react'
 import { create } from 'zustand'
 
 export const useDiagramStore = create((set, get) => ({
-    // 1. DYNAMIC TYPE ASSIGNMENT FOR THE INITIAL BLOCK
-    nodes: [
-        // {
-        //     id: '1',
-        //     type: 'brutalNode', // 🔥 UNCOMMENT THIS! This tells React Flow to use your custom design!
-        //     data: { label: 'node_1' },
-        //     position: { x: 150, y: 150 },
-        // }
-    ],
+
+    // initial states of the nodes and edges
+    nodes: [],
     edges: [],
 
     onNodesChange: (changes) => {
@@ -25,7 +19,8 @@ export const useDiagramStore = create((set, get) => ({
         const customizedEdge = {
             ...connection,
             animated: true,
-            style: { stroke: '#000000', strokeWidth: 1 },
+            selectable: true,
+            style: { stroke: '#000000', strokeWidth: 1, width: 160, height: 100 },
         };
         set({ edges: addEdge(customizedEdge, get().edges) })
     },
@@ -56,7 +51,12 @@ export const useDiagramStore = create((set, get) => ({
             edges: get().edges.filter((edge) => edge.source !== nodeToDelete && edge.target !== nodeToDelete)
         })
     },
+    deleteEdge: (edgeIdToDelete) => {
+        set({
+            edges: get().edges.filter((edge) => edge.id !== edgeIdToDelete)
+        })
+    },
     deleteAll: () => {
-        set({ nodes: [], edges:[] })
+        set({ nodes: [], edges: [] })
     }
 }))

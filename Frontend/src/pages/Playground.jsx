@@ -8,10 +8,10 @@ const Playground = () => {
 
     return (
         <>
-            <div className='bg-[#3C3C3C] h-screen w-full flex items-center justify-center ' >
+            <div className=' bg-[#3C3C3C] h-screen w-full flex items-center justify-center ' >
                 {/* left side */}
 
-                <div className='w-[20%] bg-yellow-100 h-screen flex items-center justify-center ' >
+                <div className='w-[20%]  bg-yellow-100 h-screen flex items-center justify-center ' >
                     <button
                         onClick={addNode}
                         className='text-2xl border px-4 py-2 cursor-pointer'

@@ -4,7 +4,7 @@ import Playground from './pages/Playground'
 const App = () => {
   return (
     <>
-      <Playground/>
+      <Playground  />
     </>
   )
 }
