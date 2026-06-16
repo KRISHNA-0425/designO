@@ -55,7 +55,7 @@ export const useDiagramStore = create((set, get) => ({
         const newNode = {
             id: nodeId,
             type: 'brutalNode',
-            style: { width: 180, height: 130 },
+            style: { width: 200, height: 150 },
             data: { label: customLabel },
             position: { x: spawnX, y: spawnY },
         };
