@@ -44,11 +44,11 @@ const AuthPortal = () => {
         <div className="min-h-screen w-full bg-[#222222] font-mono flex flex-col md:flex-row items-stretch overflow-x-hidden">
 
             {/* VISUAL MATRIX SIDEBAR PANEL (ONE HALF) */}
-            <div className="w-full md:w-1/2 bg-amber-100 flex flex-col items-center justify-center p-8 text-center border-b-4 md:border-b-0 md:border-r-4 border-black select-none gap-6 min-h-[300px] md:min-h-screen">
-                <h1 className="text-4xl lg:text-7xl font-black uppercase text-black tracking-tighter">
+            <div className="w-full md:w-1/2 bg-black flex flex-col items-center justify-center p-8 text-center border-b-4 md:border-b-0 md:border-r-4 border-black select-none gap-6 min-h-[300px] md:min-h-screen">
+                <h1 className="text-4xl lg:text-7xl font-black uppercase text-white tracking-tighter">
                     {isLogin ? 'Welcome Back' : 'Join Us Here'}
                 </h1>
-                <p className="text-sm font-bold text-zinc-700 max-w-sm uppercase tracking-tight">
+                <p className="text-sm font-bold text-white max-w-sm uppercase tracking-tight">
                     {isLogin
                         ? 'Access your saved board whiteboards and continue building wireframes instantly.'
                         : 'Create your credential mapping tokens and start nesting customizable nodes.'}
@@ -60,15 +60,15 @@ const AuthPortal = () => {
                         setIsLogin(!isLogin);
                         setShowPassword(false); // Reset eye vector visibility when swapping between forms
                     }}
-                    className="mt-4 text-xs font-black uppercase tracking-widest bg-yellow-300 text-black border-4 border-black px-6 py-3 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer"
+                    className="mt-4 text-xs font-black uppercase tracking-widest bg-yellow-300 text-black border-4 border-black px-6 py-3 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-white hover:text-black hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer"
                 >
                     {isLogin ? 'Switch to Register ➔' : '➔ Switch to Login'}
                 </button>
             </div>
 
             {/* INTERACTIVE FORM HUB PANEL (THE OTHER HALF) */}
-            <div className="w-full md:w-1/2 bg-[#FEFCE8] flex flex-col items-center justify-center p-6 md:p-12 min-h-[550px] md:min-h-screen">
-                <div className="w-full max-w-md bg-white border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000000]">
+            <div className="w-full md:w-1/2 bg-[#F7F7DD]/90 flex flex-col items-center justify-center p-6 md:p-12 min-h-[550px] md:min-h-screen">
+                <div className="w-full max-w-md bg-[#F7F7DD] border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000000]">
 
                     <h2 className="text-2xl font-black uppercase tracking-tight text-black mb-6 border-b-4 border-black pb-2">
                         {isLogin ? 'Account Login' : 'Register Profile'}
@@ -141,7 +141,7 @@ const AuthPortal = () => {
                         {/* MASTER FORM SUBMIT BUTTON */}
                         <button
                             type="submit"
-                            className="w-full text-xs font-black uppercase tracking-widest bg-emerald-400 text-black border-4 border-black p-3.5 mt-2 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
+                            className="w-full text-xs font-black uppercase tracking-widest bg-orange-500 text-black border-4 border-black p-3.5 mt-2 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                         >
                             {isLogin ? 'Authenticate Access ✓' : 'Register Account +'}
                         </button>
