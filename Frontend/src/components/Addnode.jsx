@@ -90,23 +90,6 @@ const Addnode = () => {
 
     return (
         <div className="w-full h-full relative">
-
-            {/* CONTROL HUB OVERLAY WRAPPER */}
-            <div className="absolute top-4 left-4 z-50 flex flex-col sm:flex-row gap-3">
-                <button
-                    onClick={deleteAll}
-                    className="text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
-                >
-                    Clear Canvas ✕
-                </button>
-
-                <button
-                    onClick={autoLayout}
-                    className="text-xs font-black uppercase tracking-wider bg-cyan-300 text-black border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
-                >
-                    Auto Arrange ✨
-                </button>
-            </div>
             
             <ReactFlow
                 nodes={nodes}
@@ -131,3 +114,4 @@ const Addnode = () => {
 }
 
 export default Addnode
+
