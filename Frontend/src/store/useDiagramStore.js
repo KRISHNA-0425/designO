@@ -7,13 +7,22 @@ const elk = new ELK();
 export const useDiagramStore = create((set, get) => ({
     nodes: [],
     edges: [],
-    // ⚡ Keeps a reference to React Flow's viewport instance mapping
     reactFlowInstance: null,
+    // Track which node is currently active/selected
+    selectedNodeId: null, 
 
     setReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
+    
+    setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
     onNodesChange: (changes) => {
-        set({ nodes: applyNodeChanges(changes, get().nodes) })
+        const selectedId = get().selectedNodeId;
+        const isDeleted = changes.some(c => c.type === 'remove' && c.id === selectedId);
+        
+        set({ 
+            nodes: applyNodeChanges(changes, get().nodes),
+            selectedNodeId: isDeleted ? null : selectedId
+        });
     },
 
     onEdgesChange: (changes) => {
@@ -30,37 +39,56 @@ export const useDiagramStore = create((set, get) => ({
         set({ edges: addEdge(customizedEdge, get().edges) })
     },
 
-    // 🚀 FIX 1: SMART SPAWNING POSITION MECHANICS
-    addNode: (customLabel) => {
+    addNode: (customLabel, description = '') => {
         const { nodes, reactFlowInstance } = get();
         const nodeId = `node_${Date.now()}`;
 
-        // Default viewport coordinates
         let spawnX = 150 + (nodes.length * 35);
         let spawnY = 150 + (nodes.length * 35);
 
-        // If the user has panned/zoomed, find the exact dead-center coordinates of their current view screen!
         if (reactFlowInstance) {
-            const viewport = reactFlowInstance.getViewport();
             const center = reactFlowInstance.screenToFlowPosition({
                 x: window.innerWidth / 2,
                 y: window.innerHeight / 2,
             });
-            // Random jitter factor offset prevents exact overlaps if you hit Enter multiple times rapidly
             const jitter = (Math.random() - 0.5) * 40;
-            spawnX = center.x + jitter - 90; // Center offset adjusted for node width (180/2)
-            spawnY = center.y + jitter - 65; // Center offset adjusted for node height (130/2)
+            spawnX = center.x + jitter - 100; 
+            spawnY = center.y + jitter - 75;  
         }
 
         const newNode = {
             id: nodeId,
             type: 'brutalNode',
             style: { width: 200, height: 150 },
-            data: { label: customLabel },
+            data: { 
+                label: customLabel,
+                description: description 
+            },
             position: { x: spawnX, y: spawnY },
         };
 
-        set({ nodes: [...nodes, newNode] })
+        set({ 
+            nodes: [...nodes, newNode],
+            selectedNodeId: nodeId 
+        });
+    },
+
+    // Multi-field updater to sync changes from inputs directly into the canvas node
+    updateNodeData: (nodeId, updatedFields) => {
+        set({
+            nodes: get().nodes.map((node) => {
+                if (node.id === nodeId) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            ...updatedFields
+                        }
+                    };
+                }
+                return node;
+            })
+        });
     },
 
     onNodeResize: (nodeId, dimensions) => {
@@ -81,7 +109,6 @@ export const useDiagramStore = create((set, get) => ({
         });
     },
 
-    // 🚀 FIX 2: CORRECTED SPACING + DYNAMIC ZOOM OUT REARRANGEMENT
     autoLayout: async () => {
         const { nodes, edges, reactFlowInstance } = get();
         if (nodes.length === 0) return;
@@ -91,25 +118,15 @@ export const useDiagramStore = create((set, get) => ({
             layoutOptions: {
                 "elk.algorithm": "layered",
                 "elk.direction": "RIGHT",
-
-                // Gap BETWEEN columns/layers — this is the horizontal spacing
-                // you actually see with elk.direction = RIGHT. The previous
-                // "nodeNodeLayered" key isn't a real ELK option, so this gap
-                // was silently falling back to ELK's tiny 20px default.
                 "elk.layered.spacing.nodeNodeBetweenLayers": "180",
-
-                // Gap between nodes stacked within the same column/layer
                 "elk.spacing.nodeNode": "100",
-
-                // Breathing room so edges routed between layers don't hug nodes
                 "elk.layered.spacing.edgeNodeBetweenLayers": "60",
-
-                "elk.padding": "[top=100,left=100,bottom=100,right=100]" // Extra outer layout bounding padding box cushion
+                "elk.padding": "[top=100,left=100,bottom=100,right=100]" 
             },
             children: nodes.map((node) => ({
                 id: node.id,
-                width: node.style?.width || 180,
-                height: node.style?.height || 130,
+                width: node.style?.width || 200,   
+                height: node.style?.height || 150, 
             })),
             edges: edges.map((edge) => ({
                 id: edge.id,
@@ -126,26 +143,22 @@ export const useDiagramStore = create((set, get) => ({
                 return {
                     ...node,
                     position: { x: elkNode.x, y: elkNode.y },
-                    // Bouncy easing curve creates a highly satisfying physical sliding transition animation effect
                     style: { ...node.style, transition: 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)' }
                 };
             });
 
             set({ nodes: layoutNodes });
 
-            // 🚀 DYNAMIC SMART CAMERA ZOOM CODES:
-            // Automatically sweeps the viewport backward to capture everything clearly inside frame boundaries
             if (reactFlowInstance) {
                 setTimeout(() => {
                     reactFlowInstance.fitView({
-                        duration: 700, // Syncs perfectly with the 0.7s node sliding translation duration
-                        padding: 0.35,  // 🌟 INCREASED ZOOM BUFFER: 0.35 means 35% empty screen padding on all outer edges
+                        duration: 700, 
+                        padding: 0.35,  
                         includeHiddenNodes: false
                     });
                 }, 50);
             }
 
-            // Safely strip the CSS transition properties away after the animation ends to maintain fluid manual dragging
             setTimeout(() => {
                 set({
                     nodes: get().nodes.map(n => ({ ...n, style: { ...n.style, transition: undefined } }))
@@ -160,11 +173,12 @@ export const useDiagramStore = create((set, get) => ({
     deleteNode: (nodeToDelete) => {
         set({
             nodes: get().nodes.filter((node) => node.id !== nodeToDelete),
-            edges: get().edges.filter((edge) => edge.source !== nodeToDelete && edge.target !== nodeToDelete)
+            edges: get().edges.filter((edge) => edge.source !== nodeToDelete && edge.target !== nodeToDelete),
+            selectedNodeId: get().selectedNodeId === nodeToDelete ? null : get().selectedNodeId
         })
     },
     deleteEdge: (edgeIdToDelete) => {
         set({ edges: get().edges.filter((edge) => edge.id !== edgeIdToDelete) })
     },
-    deleteAll: () => { set({ nodes: [], edges: [] }) }
+    deleteAll: () => { set({ nodes: [], edges: [], selectedNodeId: null }) }
 }))

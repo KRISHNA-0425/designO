@@ -3,21 +3,57 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import Addnode from '../components/Addnode'
 
 const Playground = () => {
-    const { addNode, deleteAll, autoLayout } = useDiagramStore()
+    const { addNode, deleteAll, autoLayout, selectedNodeId, nodes, updateNodeData, setSelectedNodeId } = useDiagramStore()
     const [data, setData] = useState('')
     const [description, setDescription] = useState('')
 
+    // Sync input fields whenever the active node selection changes on canvas
+    const activeNode = nodes.find(n => n.id === selectedNodeId)
+
+    useEffect(() => {
+        if (activeNode) {
+            setData(activeNode.data.label || '')
+            setDescription(activeNode.data.description || '')
+        } else {
+            setData('')
+            setDescription('')
+        }
+    }, [selectedNodeId, activeNode])
+
+    // Handle mutations on the input fields
+    const handleLabelChange = (value) => {
+        setData(value)
+        if (selectedNodeId) {
+            updateNodeData(selectedNodeId, { label: value })
+        }
+    }
+
+    const handleDescriptionChange = (value) => {
+        setDescription(value)
+        if (selectedNodeId) {
+            updateNodeData(selectedNodeId, { description: value })
+        }
+    }
+
     const handleCreateNode = () => {
         const finalLabel = data.trim() !== '' ? data : 'No label 🤔'
-        // Passing both label and description to your store action
         addNode(finalLabel, description.trim())
+        
         setData('')
         setDescription('')
+        setSelectedNodeId(null)
+    }
+
+    const handleDeselect = () => {
+        setData('')
+        setDescription('')
+        setSelectedNodeId(null)
     }
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            handleCreateNode()
+            e.preventDefault()
+            if (!selectedNodeId) handleCreateNode()
         }
     }
 
@@ -29,14 +65,29 @@ const Playground = () => {
                 {/* 💻 CONTROL SIDEBAR PANEL */}
                 <div className='w-full md:w-[25%] h-auto min-h-[220px] md:h-screen bg-amber-100 flex flex-col items-stretch justify-start p-4 md:p-6 border-b-4 md:border-b-0 md:border-r-4 border-black gap-4 select-none z-20 overflow-y-auto' >
                     
+                    {/* Mode Status Badge Header Context */}
+                    <div className="flex items-center justify-between mt-2">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] ${selectedNodeId ? 'bg-cyan-300 text-black' : 'bg-white text-black'}`}>
+                            Mode: {selectedNodeId ? 'Editing Selected' : 'Create Mode'}
+                        </span>
+                        {selectedNodeId && (
+                            <button 
+                                onClick={handleDeselect}
+                                className="text-[10px] font-black uppercase bg-white border-2 border-black px-1.5 py-0.5 hover:bg-black hover:text-white transition-all cursor-pointer"
+                            >
+                                New Node ➕
+                            </button>
+                        )}
+                    </div>
+
                     {/* Node Label Input */}
-                    <div className="flex flex-col gap-2 mt-2">
+                    <div className="flex flex-col gap-2">
                         <label className="text-xs font-black uppercase tracking-wider text-black">
                             Node Content Text:
                         </label>
                         <input
                             value={data}
-                            onChange={(e) => setData(e.target.value)}
+                            onChange={(e) => handleLabelChange(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="Type node text here..."
                             type="text"
@@ -44,26 +95,32 @@ const Playground = () => {
                         />
                     </div>
 
-                    {/* New Description Textbox Field */}
+                    {/* Description Textbox Field */}
                     <div className="flex flex-col gap-2">
                         <label className="text-xs font-black uppercase tracking-wider text-black">
                             Description:
                         </label>
                         <textarea
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => handleDescriptionChange(e.target.value)}
                             placeholder="Type block notes or description..."
                             rows={10}
                             className="w-full bg-white border-4 border-black p-2.5 md:p-3 text-sm font-bold shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-yellow-50 transition-all placeholder:text-zinc-400 resize-none"
                         />
                     </div>
 
-                    <button
-                        onClick={handleCreateNode}
-                        className='w-full text-xs font-black uppercase tracking-widest bg-emerald-400 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center mt-2'
-                    >
-                        Add New Node +
-                    </button>
+                    {!selectedNodeId ? (
+                        <button
+                            onClick={handleCreateNode}
+                            className='w-full text-xs font-black uppercase tracking-widest bg-emerald-400 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center mt-2'
+                        >
+                            Add New Node +
+                        </button>
+                    ) : (
+                        <div className="text-[11px] font-bold text-zinc-600 bg-amber-200 border-2 border-dashed border-black p-2 mt-2 text-center rounded-none select-none">
+                            ✨ Changes update canvas node values in real-time!
+                        </div>
+                    )}
 
                     {/* Horizontal Divider Line */}
                     <hr className="border-t-4 border-black my-2" />

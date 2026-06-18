@@ -4,17 +4,20 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import '@xyflow/react/dist/style.css'
 import { MdDeleteForever } from "react-icons/md";
 
-// 1. THE DUAL-PORT UNIVERSAL NODE COMPONENT
+// 1. THE UNIVERSAL BIDIRECTIONAL PORT NODE COMPONENT
 const CustomBrutalistNode = ({ id, data }) => {
     const deleteNode = useDiagramStore((state) => state.deleteNode)
+    const selectedNodeId = useDiagramStore((state) => state.selectedNodeId)
+    
+    const isSelected = id === selectedNodeId
 
     return (
         <>
             {/* 📐 STARK NEO-BRUTALIST RESIZER CONTROL BOUNDS */}
             <NodeResizer
                 isVisible={true} 
-                minWidth={150}
-                minHeight={80}
+                minWidth={180}
+                minHeight={120}
                 lineClassName="!border-black !border-2 !cursor-pointer" 
                 handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white !cursor-pointer" 
                 onResize={(event, params) => {
@@ -26,39 +29,44 @@ const CustomBrutalistNode = ({ id, data }) => {
             />
 
             {/* FLUID INNER WRAPPER CELL */}
-            <div className="w-full h-full p-4 pb-12 border-4 border-black bg-white shadow-[4px_4px_0px_0px_#000000] font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-center justify-center text-center !cursor-pointer">
+            <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${isSelected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
                 
-                {/* 🔴 LEFT HUB (Target & Source Layered Perfectly) */}
-                <Handle 
-                    type="target" 
-                    position={Position.Left} 
-                    id="t-left" 
-                    className="!bg-lime-400 !border-2 !border-black !w-3 !h-3 !rounded-none !left-[-8px] !top-[50%] -translate-y-1/2 z-40 !cursor-pointer" 
-                />
+                {/* 🔴 LEFT HUB - ACTS AS BOTH SOURCE & TARGET */}
                 <Handle 
                     type="source" 
                     position={Position.Left} 
-                    id="s-left" 
-                    className="!bg-transparent !border-0 !w-3 !h-3 !rounded-none !left-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    id="port-left" 
+                    isConnectableStart={true}
+                    isConnectableEnd={true}
+                    className="!bg-lime-400 !border-2 !border-black !w-3 !h-3 !rounded-none !left-[-10px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
                 />
 
-                {/* 🟢 RIGHT HUB (Target & Source Layered Perfectly) */}
-                <Handle 
-                    type="target" 
-                    position={Position.Right} 
-                    id="t-right" 
-                    className="!bg-lime-400 !border-2 !border-black !w-3 !h-3 !rounded-none !right-[-8px] !top-[50%] -translate-y-1/2 z-40 !cursor-pointer" 
-                />
+                {/* 🟢 RIGHT HUB - ACTS AS BOTH SOURCE & TARGET */}
                 <Handle 
                     type="source" 
                     position={Position.Right} 
-                    id="s-right" 
-                    className="!bg-transparent !border-0 !w-3 !h-3 !rounded-none !right-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    id="port-right" 
+                    isConnectableStart={true}
+                    isConnectableEnd={true}
+                    className="!bg-emerald-400 !border-2 !border-black !w-3 !h-3 !rounded-none !right-[-10px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
                 />
 
-                {/* ⚡ ISOLATED TYPOGRAPHY HUB CONTAINER */}
-                <div className="w-full text-2xl lg:text-3xl font-black uppercase text-black tracking-tight break-all line-clamp-2 max-w-full px-2 overflow-hidden select-none !cursor-pointer">
+                {/* ⚡ TITLE LAYER HEADER */}
+                <div className="w-full text-base font-black uppercase text-black tracking-tight break-words line-clamp-2 border-b-2 border-black pb-1 select-none !cursor-pointer">
                     {data.label}
+                </div>
+
+                {/* ✨ DESCRIPTION INNER TEXT AREA BOX */}
+                <div className="w-full mt-2 overflow-y-auto flex-1 nodrag cursor-text pr-1">
+                    {data.description ? (
+                        <p className="text-[11px] font-bold text-zinc-700 leading-tight whitespace-pre-wrap break-words">
+                            {data.description}
+                        </p>
+                    ) : (
+                        <p className="text-[11px] italic text-zinc-400 select-none">
+                            No description added
+                        </p>
+                    )}
                 </div>
 
                 {/* ATOMIC INLINE CARD DELETE TRASH TRIGGER */}
@@ -76,7 +84,6 @@ const CustomBrutalistNode = ({ id, data }) => {
     )
 }
 
-// Global edge runtime behavioral formatting configuration rules
 const defaultEdgeOptions = {
     selectable: true,
     style: { stroke: '#000000', strokeWidth: 3, cursor: 'pointer' }
@@ -84,7 +91,7 @@ const defaultEdgeOptions = {
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
 const Addnode = () => {
-    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteAll, deleteEdge, autoLayout } = useDiagramStore()
+    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteEdge, setSelectedNodeId } = useDiagramStore()
 
     const nodeTypes = useMemo(() => ({ brutalNode: CustomBrutalistNode }), [])
 
@@ -99,10 +106,20 @@ const Addnode = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onInit={(instance) => useDiagramStore.getState().setReactFlowInstance(instance)}
+                onNodeClick={(event, node) => {
+                    setSelectedNodeId(node.id)
+                }}
+                onPaneClick={() => {
+                    setSelectedNodeId(null)
+                }}
                 onEdgeClick={(event, edge) => {
                     deleteEdge(edge.id);
                 }}
                 defaultEdgeOptions={defaultEdgeOptions}
+                
+                // 🛠️ THE MAGIC LINE: Switches canvas into loose connection validation mode
+                connectionMode="loose" 
+                
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
                 fitView
             >
@@ -114,4 +131,3 @@ const Addnode = () => {
 }
 
 export default Addnode
-
