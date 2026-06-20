@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { urlencoded } from 'express'
 import dotenv from 'dotenv'
 import connectDb from './config/db.js';
 dotenv.config();
@@ -6,6 +6,8 @@ dotenv.config();
 const port = process.env.PORT
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
 
 app.get("/", (req, res) => {
     res.send("hello")
@@ -18,13 +20,17 @@ app.get("/", (req, res) => {
 
 
 const startServer = async () => {
-    connectDb().then(() => {
-        app.listen(`server is running on port ${port}`)
-    })
-        .catch((e) => {
-            console.log(e)
-        })
-        
+
+    try {
+        await connectDb()
+        console.log("db connected");
+
+        app.listen(port, () => { console.log((`server is running at port: ${port}`)) });
+
+    } catch (error) {
+        console.log(error)
+    }
+
 }
 
 startServer();
