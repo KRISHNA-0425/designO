@@ -1,6 +1,7 @@
 import express, { urlencoded } from 'express'
 import dotenv from 'dotenv'
 import connectDb from './config/db.js';
+import authRouter from './routes/authRoutes.js';
 dotenv.config();
 
 const port = process.env.PORT
@@ -13,11 +14,7 @@ app.get("/", (req, res) => {
     res.send("hello")
 })
 
-
-// app.listen(port, ()=>{
-//     console.log(`server is running at port ${port}`);
-// });
-
+app.use('/api/auth', authRouter);
 
 const startServer = async () => {
 
