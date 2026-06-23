@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema({
         minlength: [6, 'Password must be at least 6 characters long'],
         // maxlength: [12, 'Password must not be greater than 12 characters'], // this will give error
         select: false // Hides the password from standard queries (e.g., User.find()) automatically
+    },
+    loginAttempts: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    lockUntil: {
+        type: Date
     }
 }, {
     timestamps: true

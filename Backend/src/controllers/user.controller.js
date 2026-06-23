@@ -11,9 +11,17 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: "fill all the details" });
         }
 
-        const exisitingUser = await User.findOne({ email });
+        if (password.length < 6 || password.length > 20) {
+            return res.status(400).json({ message: "Password must be between 6 and 20 characters long" });
+        }
 
-        if (exisitingUser) {
+        if (name.length > 30) {
+            return res.status(400).json({ message: "Name is too long" });
+        }
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
             return res.status(400).json({ message: "user already exsists, kindly try to login" });
         }
 
@@ -58,20 +66,36 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "please enter all the details" });
         }
 
-        const exisitingUser = await User.findOne({ email }).select("+password");
+        const existingUser = await User.findOne({ email }).select("+password");
 
-        if (!exisitingUser) {
+        if (!existingUser) {
             return res.status(400).json({ message: "invalid credentials" });
         }
 
-        const verifiedPass = await bcryptjs.compare(password, exisitingUser.password)
+        const verifiedPass = await bcryptjs.compare(password, existingUser.password)
 
         if (!verifiedPass) {
+            // 🛠️ NEW: Increment failed attempts on wrong password
+            existingUser.loginAttempts += 1;
+
+            if (existingUser.loginAttempts >= 5) {
+                existingUser.lockUntil = Date.now() + 2 * 60 * 60 * 1000; // Lock for 2 hours
+                existingUser.loginAttempts = 0; // Reset counter for next time
+            }
+
+            await existingUser.save();
             return res.status(400).json({ message: "invalid credentials" });
         }
 
+        //  Reset failed attempts on a successful login
+        if (existingUser.loginAttempts > 0 || existingUser.lockUntil) {
+            existingUser.loginAttempts = 0;
+            existingUser.lockUntil = undefined;
+            await existingUser.save();
+        }
 
-        const token = genToken(exisitingUser._id)
+
+        const token = genToken(existingUser._id)
 
         res.cookie("token", token, {
             maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -82,11 +106,11 @@ export const login = async (req, res) => {
 
         return res.status(200).json({
             user: {
-                id: exisitingUser._id,
-                name: exisitingUser.name,
-                email: exisitingUser.email
+                id: existingUser._id,
+                name: existingUser.name,
+                email: existingUser.email
             },
-            
+
         });
 
     } catch (error) {
