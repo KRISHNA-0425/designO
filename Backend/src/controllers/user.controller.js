@@ -118,3 +118,51 @@ export const login = async (req, res) => {
 
     }
 }
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        });
+
+        return res.status(200).json({ message: "Logged out successfully" });
+
+    } catch (error) {
+        console.error("intrnal server error in Logout contorller", error);
+        return res.status(500).json({ message: "Internal server error during logout" });
+    }
+}
+
+export const googleAuthController = async (req, res) => {
+    try {
+        const { name, email } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({ message: "Invalid Credentials" })
+        }
+
+        let user = await User.findOne({ email })
+
+        if (!user) {
+            user = await User.create({
+                name: name,
+                email: email,
+            })
+        }
+
+        let token = genToken(user._id)
+        res.cookie("token", token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: 'lax'
+        })
+
+        return res.status(200).json({ message: "user created", user })
+
+    } catch (error) {
+        return res.status(500).json({ message: `internal server error in googleAuthController ${error}` })
+    }
+}
