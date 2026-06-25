@@ -4,13 +4,13 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import '@xyflow/react/dist/style.css'
 import { MdDeleteForever } from "react-icons/md";
 
-// 1. THE PERFECTED UNIVERSAL PORT NODE COMPONENT
+// 1. THE CARDINAL 4-PORT NEOMORPHIC BRUTALIST NODE WITH PARSING ALIAS CORES
 const CustomBrutalistNode = ({ id, data, selected }) => {
     const deleteNode = useDiagramStore((state) => state.deleteNode)
 
     return (
         <>
-            {/* 📐 Stark Transform Handler: Only visible when this card is actively selected */}
+            {/* Stark Transform Handler: Only visible when this card is actively selected */}
             <NodeResizer
                 isVisible={selected} 
                 minWidth={180}
@@ -26,49 +26,70 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
             />
 
             {/* FLUID INNER WRAPPER CELL */}
-            <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
+            <div 
+                style={{ backgroundColor: data.bg || '#ffffff' }}
+                className={`w-full h-full p-4 pb-12 border-4 border-black font-mono relative transition-all flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible shadow-[4px_4px_0px_0px_#000000] ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4] !border-cyan-400' : ''}`}
+            >
                 
-                {/* 🔴 LEFT BLACK HANDLE */}
+                {/* ⬆️ TOP CARDINAL HANDLE */}
+                <Handle 
+                    type="target" 
+                    position={Position.Top} 
+                    id="black-top" 
+                    isConnectableStart={true}
+                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !top-[-8px] !left-[50%] -translate-x-1/2 z-50 !cursor-pointer" 
+                />
+
+                {/* ⬇️ BOTTOM CARDINAL HANDLE */}
+                <Handle 
+                    type="target" 
+                    position={Position.Bottom} 
+                    id="black-bottom" 
+                    isConnectableStart={true}
+                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !bottom-[-8px] !left-[50%] -translate-x-1/2 z-50 !cursor-pointer" 
+                />
+
+                {/* ⬅️ LEFT CARDINAL SYSTEM */}
                 <Handle 
                     type="target" 
                     position={Position.Left} 
                     id="black-left" 
-                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
-                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] z-50 !cursor-pointer" 
+                    isConnectableStart={true}
+                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !left-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
                 />
-                {/* 🟢 LEFT LIME HANDLE */}
+                {/* ⚡ HIDDEN ALIAS HUB: Resolves old cache strings from throwing canvas errors */}
                 <Handle 
                     type="source" 
                     position={Position.Left} 
                     id="lime-left" 
-                    className="!bg-lime-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] !top-[35%] z-50 !cursor-pointer" 
+                    className="!opacity-0 !w-0 !h-0 !absolute !left-0 !top-[50%] !pointer-events-none" 
                 />
 
-                {/* 🔴 RIGHT BLACK HANDLE */}
+                {/* ➡️ RIGHT CARDINAL SYSTEM */}
                 <Handle 
                     type="target" 
                     position={Position.Right} 
                     id="black-right" 
-                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
-                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] z-50 !cursor-pointer" 
+                    isConnectableStart={true}
+                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !right-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
                 />
-                {/* 🟢 RIGHT EMERALD HANDLE */}
+                {/* ⚡ HIDDEN ALIAS HUB: Resolves old cache strings from throwing canvas errors */}
                 <Handle 
                     type="source" 
                     position={Position.Right} 
                     id="emerald-right" 
-                    className="!bg-emerald-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] !top-[65%] z-50 !cursor-pointer" 
+                    className="!opacity-0 !w-0 !h-0 !absolute !right-0 !top-[50%] !pointer-events-none" 
                 />
 
-                {/* ⚡ TITLE LAYER HEADER */}
-                <div className="w-full text-base font-black uppercase text-black tracking-tight break-words line-clamp-2 border-b-2 border-black pb-1 select-none !cursor-pointer">
+                {/* TITLE LAYER HEADER */}
+                <div className="w-full text-base font-black uppercase text-black tracking-tight break-words line-clamp-1 border-b-2 border-black pb-1 select-none !cursor-pointer">
                     {data.label}
                 </div>
 
-                {/* ✨ DESCRIPTION INNER TEXT AREA BOX */}
+                {/* DESCRIPTION/SUBTITLE TEXT */}
                 <div className="w-full mt-2 overflow-y-auto flex-1 nodrag cursor-text pr-1">
                     {data.description ? (
-                        <p className="text-[11px] font-bold text-zinc-700 leading-tight whitespace-pre-wrap break-words">
+                        <p className="text-[11px] font-bold text-zinc-900 leading-tight whitespace-pre-wrap break-words">
                             {data.description}
                         </p>
                     ) : (
@@ -93,9 +114,16 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
     )
 }
 
+// Default layout configurations matching your uniform store blueprint styles
 const defaultEdgeOptions = {
+    type: 'smoothstep',
     selectable: true,
-    style: { stroke: '#000000', strokeWidth: 3, cursor: 'pointer' }
+    style: { 
+        stroke: '#000000', 
+        strokeWidth: 3, 
+        strokeDasharray: '6,6', 
+        cursor: 'pointer' 
+    }
 };
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
@@ -104,21 +132,9 @@ const Addnode = () => {
 
     const nodeTypes = useMemo(() => ({ brutalNode: CustomBrutalistNode }), [])
 
-    // ⚡ THE CUSTOM LOGIC GATE RULE (STRICT BLACK-TO-BLACK BLOCKER)
     const checkValidConnection = (connection) => {
-        // Prevent a node from connecting handles to itself
         if (connection.source === connection.target) return false;
-
-        const sourceHandleId = connection.sourceHandle || '';
-        const targetHandleId = connection.targetHandle || '';
-
-        // 🛑 STRICT GATEKEEPER: Discard connection immediately if both handle IDs contain 'black'
-        if (sourceHandleId.includes('black') && targetHandleId.includes('black')) {
-            console.warn("✕ Connection Denied: Black handles cannot link to other black handles!");
-            return false;
-        }
-
-        return true; // Allows any other combination (black-to-lime, lime-to-emerald, etc.)
+        return true; 
     };
 
     return (
@@ -141,13 +157,10 @@ const Addnode = () => {
                     deleteEdge(edge.id);
                 }}
                 onNodeDragStop={() => {
-                    saveDiagram(); // Auto-saves absolute grid coordinates to MongoDB when dragging drops
+                    saveDiagram();
                 }}
                 defaultEdgeOptions={defaultEdgeOptions}
-                
-                // 🔒 PASS THE LOGIC GATEKEEPER INTERCEPTOR PROP HERE:
                 isValidConnection={checkValidConnection}
-                
                 connectionMode="loose" 
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
                 fitView

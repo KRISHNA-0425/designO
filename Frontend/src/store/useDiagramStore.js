@@ -1,9 +1,28 @@
-import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
+import { addEdge, applyEdgeChanges, applyNodeChanges, MarkerType } from '@xyflow/react';
 import { create } from 'zustand';
 import ELK from 'elkjs/lib/elk.bundled.js';
-import API from '../api/axios'; // Linked to your custom Axios utility
+import API from '../api/axios';
 
 const elk = new ELK();
+
+// 🎨 SINGLE SOURCE OF TRUTH FOR THE CRISP NEO-BRUTALIST ARCHITECTURAL STYLE
+// Aligned with the exact look from your blueprint image!
+const EDGE_VISUALS = {
+    type: 'smoothstep', // Right-angle orthogonal turns
+    animated: true,    // ⚡ THE FIX: Changed from false to true to activate data flow animation!
+    selectable: true,
+    style: { 
+        stroke: '#000000', 
+        strokeWidth: 3, 
+        strokeDasharray: '6,6' // Sharp dashed line layout pattern
+    },
+    markerEnd: {
+        type: MarkerType.ArrowClosed, 
+        width: 20,
+        height: 20,
+        color: '#000000',
+    },
+};
 
 export const useDiagramStore = create((set, get) => ({
     // --- STATE FIELDS ---
@@ -12,7 +31,6 @@ export const useDiagramStore = create((set, get) => ({
     reactFlowInstance: null,
     selectedNodeId: null, 
     
-    // Server Synchronization Sync States
     isSaving: false,
     isFetching: false,
     diagramError: null,
@@ -36,11 +54,10 @@ export const useDiagramStore = create((set, get) => ({
     },
 
     onConnect: (connection) => {
+        // Enforce centralized visuals on newly created edges instantly
         const customizedEdge = {
             ...connection,
-            animated: true,
-            selectable: true,
-            style: { stroke: '#000000', strokeWidth: 3 },
+            ...EDGE_VISUALS,
         };
         set({ edges: addEdge(customizedEdge, get().edges) })
     },
@@ -86,10 +103,7 @@ export const useDiagramStore = create((set, get) => ({
                 if (node.id === nodeId) {
                     return {
                         ...node,
-                        data: {
-                            ...node.data,
-                            ...updatedFields
-                        }
+                        data: { ...node.data, ...updatedFields }
                     };
                 }
                 return node;
@@ -130,48 +144,47 @@ export const useDiagramStore = create((set, get) => ({
     deleteAll: () => { set({ nodes: [], edges: [], selectedNodeId: null }) },
 
     // --- BACKEND DATABASE REST CHANNELS ---
-
-    // 1. SAVE CANVAS (POST to /node/save)
     saveDiagram: async () => {
         set({ isSaving: true, diagramError: null });
         try {
-            // Grab the absolute absolute current states using get() explicitly
             const currentNodes = get().nodes || [];
             const currentEdges = get().edges || [];
             
-            // ⚡ FORCE STRICT ARRAY FALLBACK VALUES BEFORE TRANSMITTING
             const payload = {
                 nodes: Array.isArray(currentNodes) ? currentNodes : [],
                 edges: Array.isArray(currentEdges) ? currentEdges : []
             };
 
-            const res = await API.post('/node/save', payload);
-
+            await API.post('/node/save', payload);
             set({ isSaving: false });
             return { success: true };
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to backup canvas coordinates ✕";
             set({ isSaving: false, diagramError: msg });
-            console.error("Zustand Save Error:", err.response?.data);
             return { success: false, error: msg };
         }
     },
 
-    // 2. FETCH CANVAS (GET to /node)
     fetchDiagram: async () => {
         set({ isFetching: true, diagramError: null });
         try {
             const res = await API.get('/node');
-            
+            const fetchedNodes = res.data.nodes || [];
+
+            // Apply style configurations cleanly onto items from the server
+            const fetchedEdges = (res.data.edges || []).map((edge) => ({
+                ...edge,
+                ...EDGE_VISUALS,
+            }));
+
             set({
-                nodes: res.data.nodes || [],
-                edges: res.data.edges || [],
+                nodes: fetchedNodes,
+                edges: fetchedEdges,
                 isFetching: false
             });
 
-            // Automatically recalibrate active view boundaries
             const instance = get().reactFlowInstance;
-            if (instance && res.data.nodes?.length > 0) {
+            if (instance && fetchedNodes.length > 0) {
                 setTimeout(() => instance.fitView({ padding: 0.2, duration: 400 }), 100);
             }
             return { success: true };
@@ -182,19 +195,11 @@ export const useDiagramStore = create((set, get) => ({
         }
     },
 
-    // 3. WIPE WORKSPACE DATABASE-SIDE (DELETE to /node/delete)
     clearBackendWorkspace: async () => {
         set({ isSaving: true, diagramError: null });
         try {
             await API.delete('/node/delete');
-            
-            // Wipe client state locally too
-            set({ 
-                nodes: [], 
-                edges: [], 
-                selectedNodeId: null,
-                isSaving: false 
-            });
+            set({ nodes: [], edges: [], selectedNodeId: null, isSaving: false });
             return { success: true };
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to clear remote workspace ✕";
@@ -203,7 +208,6 @@ export const useDiagramStore = create((set, get) => ({
         }
     },
 
-    // --- AUTO LAYOUT ALGORITHM ENGINE ---
     autoLayout: async () => {
         const { nodes, edges, reactFlowInstance } = get();
         if (nodes.length === 0) return;
@@ -242,15 +246,16 @@ export const useDiagramStore = create((set, get) => ({
                 };
             });
 
-            set({ nodes: layoutNodes });
+            const layoutEdges = edges.map((edge) => ({
+                ...edge,
+                ...EDGE_VISUALS,
+            }));
+
+            set({ nodes: layoutNodes, edges: layoutEdges });
 
             if (reactFlowInstance) {
                 setTimeout(() => {
-                    reactFlowInstance.fitView({
-                        duration: 700, 
-                        padding: 0.35,  
-                        includeHiddenNodes: false
-                    });
+                    reactFlowInstance.fitView({ duration: 700, padding: 0.35, includeHiddenNodes: false });
                 }, 50);
             }
 
@@ -261,7 +266,7 @@ export const useDiagramStore = create((set, get) => ({
             }, 750);
 
         } catch (error) {
-            console.error("The ELK Dynamic Rearrangement layout grid pass failed:", error);
+            console.error("ELK Auto Layout failed:", error);
         }
     }
 }));
