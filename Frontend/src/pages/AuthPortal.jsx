@@ -1,24 +1,44 @@
 import { signInWithPopup } from 'firebase/auth';
-import React, { useState } from 'react';
-// 🔥 IMPORT UPDATED: Added the Ionicons eye vectors
+import React, { useEffect, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { auth, provider } from '../utils/firebase';
+import { useAuthStore } from '../store/useAuthStore';
+import { useNavigate } from 'react-router-dom'
 
 const AuthPortal = () => {
+
+    const navigate = useNavigate()
+    const { isAuthenticated, register, login, googleAuth } = useAuthStore()
+
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [username, setUsername] = useState('');
+    const [name, setUsername] = useState('');
 
     // ⚡ NEW ACCESSIBILITY STATE: Controls the hidden/visible string parameter switch
     const [showPassword, setShowPassword] = useState(false);
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            console.log("User successfully verified! ");
+            navigate("/")
+        }
+    }, [isAuthenticated])
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isLogin) {
-            console.log("Logging in with standard credentials:", { email, password });
+            // console.log("Logging in with standard credentials:", { email, password });
+            const result = login(email, password);
+            if (result.success) {
+                console.log('user logged')
+            }
         } else {
-            console.log("Registering with standard credentials:", { username, email, password });
+            // console.log("Registering with standard credentials:", { name, email, password });
+            const result = register(name, email, password);
+            if (result.success) {
+                console.log('user registered')
+            }
         }
     };
 
@@ -33,6 +53,10 @@ const AuthPortal = () => {
             const name = User.displayName;
             const email = User.email;
 
+            googleAuth(name, email)
+            if (success) {
+                console.log('google auth successfull')
+            }
 
         } catch (error) {
             console.log(error);
@@ -84,9 +108,9 @@ const AuthPortal = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={username}
+                                    value={name}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Your username..."
+                                    placeholder="Your name..."
                                     required={!isLogin}
                                     className="w-full bg-white border-4 border-black p-3 text-sm font-bold shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-yellow-50 transition-all placeholder:text-zinc-400"
                                 />
