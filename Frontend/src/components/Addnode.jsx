@@ -4,18 +4,15 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import '@xyflow/react/dist/style.css'
 import { MdDeleteForever } from "react-icons/md";
 
-// 1. THE UNIVERSAL BIDIRECTIONAL PORT NODE COMPONENT
-const CustomBrutalistNode = ({ id, data }) => {
+// 1. THE PERFECTED UNIVERSAL PORT NODE COMPONENT
+const CustomBrutalistNode = ({ id, data, selected }) => {
     const deleteNode = useDiagramStore((state) => state.deleteNode)
-    const selectedNodeId = useDiagramStore((state) => state.selectedNodeId)
-    
-    const isSelected = id === selectedNodeId
 
     return (
         <>
-            {/* 📐 STARK NEO-BRUTALIST RESIZER CONTROL BOUNDS */}
+            {/* 📐 Stark Transform Handler: Only visible when this card is actively selected */}
             <NodeResizer
-                isVisible={true} 
+                isVisible={selected} 
                 minWidth={180}
                 minHeight={120}
                 lineClassName="!border-black !border-2 !cursor-pointer" 
@@ -29,26 +26,38 @@ const CustomBrutalistNode = ({ id, data }) => {
             />
 
             {/* FLUID INNER WRAPPER CELL */}
-            <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${isSelected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
+            <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
                 
-                {/* 🔴 LEFT HUB - ACTS AS BOTH SOURCE & TARGET */}
+                {/* 🔴 LEFT BLACK HANDLE */}
+                <Handle 
+                    type="target" 
+                    position={Position.Left} 
+                    id="black-left" 
+                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] z-50 !cursor-pointer" 
+                />
+                {/* 🟢 LEFT LIME HANDLE */}
                 <Handle 
                     type="source" 
                     position={Position.Left} 
-                    id="port-left" 
-                    isConnectableStart={true}
-                    isConnectableEnd={true}
-                    className="!bg-lime-400 !border-2 !border-black !w-3 !h-3 !rounded-none !left-[-10px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    id="lime-left" 
+                    className="!bg-lime-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] !top-[35%] z-50 !cursor-pointer" 
                 />
 
-                {/* 🟢 RIGHT HUB - ACTS AS BOTH SOURCE & TARGET */}
+                {/* 🔴 RIGHT BLACK HANDLE */}
+                <Handle 
+                    type="target" 
+                    position={Position.Right} 
+                    id="black-right" 
+                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] z-50 !cursor-pointer" 
+                />
+                {/* 🟢 RIGHT EMERALD HANDLE */}
                 <Handle 
                     type="source" 
                     position={Position.Right} 
-                    id="port-right" 
-                    isConnectableStart={true}
-                    isConnectableEnd={true}
-                    className="!bg-emerald-400 !border-2 !border-black !w-3 !h-3 !rounded-none !right-[-10px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    id="emerald-right" 
+                    className="!bg-emerald-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] !top-[65%] z-50 !cursor-pointer" 
                 />
 
                 {/* ⚡ TITLE LAYER HEADER */}
@@ -91,13 +100,29 @@ const defaultEdgeOptions = {
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
 const Addnode = () => {
-    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteEdge, setSelectedNodeId } = useDiagramStore()
+    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteEdge, setSelectedNodeId, saveDiagram } = useDiagramStore()
 
     const nodeTypes = useMemo(() => ({ brutalNode: CustomBrutalistNode }), [])
 
+    // ⚡ THE CUSTOM LOGIC GATE RULE (STRICT BLACK-TO-BLACK BLOCKER)
+    const checkValidConnection = (connection) => {
+        // Prevent a node from connecting handles to itself
+        if (connection.source === connection.target) return false;
+
+        const sourceHandleId = connection.sourceHandle || '';
+        const targetHandleId = connection.targetHandle || '';
+
+        // 🛑 STRICT GATEKEEPER: Discard connection immediately if both handle IDs contain 'black'
+        if (sourceHandleId.includes('black') && targetHandleId.includes('black')) {
+            console.warn("✕ Connection Denied: Black handles cannot link to other black handles!");
+            return false;
+        }
+
+        return true; // Allows any other combination (black-to-lime, lime-to-emerald, etc.)
+    };
+
     return (
         <div className="w-full h-full relative">
-            
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -115,11 +140,15 @@ const Addnode = () => {
                 onEdgeClick={(event, edge) => {
                     deleteEdge(edge.id);
                 }}
+                onNodeDragStop={() => {
+                    saveDiagram(); // Auto-saves absolute grid coordinates to MongoDB when dragging drops
+                }}
                 defaultEdgeOptions={defaultEdgeOptions}
                 
-                // 🛠️ THE MAGIC LINE: Switches canvas into loose connection validation mode
-                connectionMode="loose" 
+                // 🔒 PASS THE LOGIC GATEKEEPER INTERCEPTOR PROP HERE:
+                isValidConnection={checkValidConnection}
                 
+                connectionMode="loose" 
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
                 fitView
             >

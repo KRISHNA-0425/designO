@@ -57,6 +57,7 @@ const AuthPortal = () => {
             if (success) {
                 console.log('google auth successfull')
             }
+            navigate("/")
 
         } catch (error) {
             console.log(error);

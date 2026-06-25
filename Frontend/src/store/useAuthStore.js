@@ -1,114 +1,118 @@
 import { create } from 'zustand'
 import API from '../api/axios';
-import { persist, createJSONStorage } from 'zustand/middleware'; // Fixed missing import
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const useAuthStore = create(
-    persist((set, get) => ({
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        token: null,
+    persist(
+        (set, get) => ({
+            // --- STATE PROPERTIES ---
+            user: null,
+            token: null, // Cleaned up the duplicate declaration
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
 
+            // --- NATIVE FUNCTIONALITIES ---
 
-        // native functionalities ->
+            // 1. REGISTER
+            register: async (name, email, password) => {
+                set({ isLoading: true, error: null })
+                try {
+                    const res = await API.post('/auth/register', {
+                        name,
+                        email,
+                        password
+                    })
 
-        // 1. register
+                    set({
+                        user: res.data.user,
+                        isAuthenticated: true,
+                        isLoading: false,
+                        token: res.data.token
+                    })
+                    return { success: true };
+                } catch (err) {
+                    const errMsg = err.response?.data?.message || 'Registration failed ✕';
+                    set({ isLoading: false, error: errMsg });
+                    console.log(errMsg)
+                    return { success: false };
+                }
+            },
 
-        register: async (name, email, password) => {
-            set({ isLoading: true })
+            // 2. LOGIN
+            login: async (email, password) => {
+                set({ isLoading: true, error: null })
+                try {
+                    const result = await API.post('/auth/login', {
+                        email, password
+                    })
+                    set({
+                        user: result.data.user,
+                        isAuthenticated: true,
+                        isLoading: false,
+                        token: result.data.token
+                    })
+                    return { success: true };
+                } catch (err) {
+                    const errMsg = err.response?.data?.message || 'Login failed ✕';
+                    set({ isLoading: false, error: errMsg });
+                    console.log(errMsg)
+                    return { success: false };
+                }
+            },
 
-            try {
-                const res = await API.post('/auth/register', {
-                    name,
-                    email,
-                    password
-                })
+            // 3. LOGOUT
+            logout: async () => {
+                set({ isLoading: true })
+                try {
+                    await API.post('/auth/logout')
+                } catch (err) {
+                    const errMsg = err.response?.data?.message || 'Logout failed ✕';
+                    console.log(errMsg)
+                } finally {
+                    // Always reset local state fields safely
+                    set({
+                        user: null,
+                        token: null,
+                        isAuthenticated: false,
+                        isLoading: false,
+                        error: null
+                    })
+                }
+            },
 
-                set({
-                    user: res.data.user,
-                    isAuthenticated: true,
-                    isLoading: false,
-                    token: res.data.token
-                })
-                return { success: true };
-
-            } catch (err) {
-                const errMsg = err.response?.data?.message || 'Registration failed ✕';
-                set({ isLoading: false });
-                console.log(errMsg)
-                return { success: false };
-
+            // 4. GOOGLE AUTH
+            googleAuth: async (name, email) => {
+                set({ isLoading: true, error: null })
+                try {
+                    const result = await API.post("/auth/googleAuth", {
+                        name,
+                        email
+                    })
+                    set({
+                        user: result.data.user,
+                        isAuthenticated: true,
+                        token: result.data.token,
+                        isLoading: false
+                    })
+                    return { success: true }
+                } catch (err) {
+                    const errMsg = err.response?.data?.message || 'Google Auth failed ✕';
+                    set({ isLoading: false, error: errMsg });
+                    console.log(errMsg)
+                    return { success: false };
+                }
             }
-        },
-
-        // 2. login
-        login: async (email, password) => {
-            set({ isLoading: true })
-            try {
-                const result = await API.post('/auth/login', {
-                    email, password
-                })
-                set({
-                    user: result.data.user,
-                    isAuthenticated: true,
-                    isLoading: false,
-                    token: result.data.token
-                })
-                return { success: true };
-            } catch (err) {
-                const errMsg = err.response?.data?.message || 'login failed ✕';
-                set({ isLoading: false });
-                console.log(errMsg)
-                return { success: false };
-            }
-        },
-
-        //3. logout
-        logout: async () => {
-            set({ isLoading: true })
-            try {
-                await API.post('/auth/logout')
-                set({
-                    user: null,
-                    token: null,
-                    isAuthenticated: false,
-                    isLoading: false,
-                    error: null
-                })
-            } catch (err) {
-                const errMsg = err.response?.data?.message || 'logout failed ✕';
-                set({ isLoading: false });
-                console.log(errMsg)
-                return { success: false };
-            }
-        },
-
-        //google auth 
-
-        googleAuth: async (name, email) => {
-            set({ isLoading: true })
-            try {
-                const result = await API.post("/auth/googleAuth", {
-                    name,
-                    email
-                })
-                set({
-                    user: result.data.user,
-                    isAuthenticated: true,
-                    token: result.data.token,
-                    isLoading: false
-                })
-                return { success: true }
-            } catch (err) {
-                const errMsg = err.response?.data?.message || 'googleAuth failed ✕';
-                set({ isLoading: false });
-                console.log(errMsg)
-                return { success: false };
-            }
+        }), 
+        {
+            name: 'desiging', // The key tag used to read/write to your disk
+            storage: createJSONStorage(() => localStorage),
+            // Selectively keeps error banners and spinners out of local storage cache
+            partialize: (state) => ({
+                user: state.user,
+                token: state.token,
+                isAuthenticated: state.isAuthenticated
+            })
         }
-
-    }))
+    )
 )
-
-

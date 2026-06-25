@@ -1,18 +1,24 @@
-import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react'
-import { create } from 'zustand'
-import ELK from 'elkjs/lib/elk.bundled.js'
+import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
+import { create } from 'zustand';
+import ELK from 'elkjs/lib/elk.bundled.js';
+import API from '../api/axios'; // Linked to your custom Axios utility
 
 const elk = new ELK();
 
 export const useDiagramStore = create((set, get) => ({
+    // --- STATE FIELDS ---
     nodes: [],
     edges: [],
     reactFlowInstance: null,
-    // Track which node is currently active/selected
     selectedNodeId: null, 
-
-    setReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
     
+    // Server Synchronization Sync States
+    isSaving: false,
+    isFetching: false,
+    diagramError: null,
+
+    // --- SYNCHRONIZER ACTIONS ---
+    setReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
     onNodesChange: (changes) => {
@@ -39,6 +45,7 @@ export const useDiagramStore = create((set, get) => ({
         set({ edges: addEdge(customizedEdge, get().edges) })
     },
 
+    // --- NODE MODIFICATION ACTIONS ---
     addNode: (customLabel, description = '') => {
         const { nodes, reactFlowInstance } = get();
         const nodeId = `node_${Date.now()}`;
@@ -73,7 +80,6 @@ export const useDiagramStore = create((set, get) => ({
         });
     },
 
-    // Multi-field updater to sync changes from inputs directly into the canvas node
     updateNodeData: (nodeId, updatedFields) => {
         set({
             nodes: get().nodes.map((node) => {
@@ -109,6 +115,95 @@ export const useDiagramStore = create((set, get) => ({
         });
     },
 
+    deleteNode: (nodeToDelete) => {
+        set({
+            nodes: get().nodes.filter((node) => node.id !== nodeToDelete),
+            edges: get().edges.filter((edge) => edge.source !== nodeToDelete && edge.target !== nodeToDelete),
+            selectedNodeId: get().selectedNodeId === nodeToDelete ? null : get().selectedNodeId
+        })
+    },
+
+    deleteEdge: (edgeIdToDelete) => {
+        set({ edges: get().edges.filter((edge) => edge.id !== edgeIdToDelete) })
+    },
+
+    deleteAll: () => { set({ nodes: [], edges: [], selectedNodeId: null }) },
+
+    // --- BACKEND DATABASE REST CHANNELS ---
+
+    // 1. SAVE CANVAS (POST to /node/save)
+    saveDiagram: async () => {
+        set({ isSaving: true, diagramError: null });
+        try {
+            // Grab the absolute absolute current states using get() explicitly
+            const currentNodes = get().nodes || [];
+            const currentEdges = get().edges || [];
+            
+            // ⚡ FORCE STRICT ARRAY FALLBACK VALUES BEFORE TRANSMITTING
+            const payload = {
+                nodes: Array.isArray(currentNodes) ? currentNodes : [],
+                edges: Array.isArray(currentEdges) ? currentEdges : []
+            };
+
+            const res = await API.post('/node/save', payload);
+
+            set({ isSaving: false });
+            return { success: true };
+        } catch (err) {
+            const msg = err.response?.data?.message || "Failed to backup canvas coordinates ✕";
+            set({ isSaving: false, diagramError: msg });
+            console.error("Zustand Save Error:", err.response?.data);
+            return { success: false, error: msg };
+        }
+    },
+
+    // 2. FETCH CANVAS (GET to /node)
+    fetchDiagram: async () => {
+        set({ isFetching: true, diagramError: null });
+        try {
+            const res = await API.get('/node');
+            
+            set({
+                nodes: res.data.nodes || [],
+                edges: res.data.edges || [],
+                isFetching: false
+            });
+
+            // Automatically recalibrate active view boundaries
+            const instance = get().reactFlowInstance;
+            if (instance && res.data.nodes?.length > 0) {
+                setTimeout(() => instance.fitView({ padding: 0.2, duration: 400 }), 100);
+            }
+            return { success: true };
+        } catch (err) {
+            const msg = err.response?.data?.message || "Failed to download node coordinates ✕";
+            set({ isFetching: false, diagramError: msg });
+            return { success: false, error: msg };
+        }
+    },
+
+    // 3. WIPE WORKSPACE DATABASE-SIDE (DELETE to /node/delete)
+    clearBackendWorkspace: async () => {
+        set({ isSaving: true, diagramError: null });
+        try {
+            await API.delete('/node/delete');
+            
+            // Wipe client state locally too
+            set({ 
+                nodes: [], 
+                edges: [], 
+                selectedNodeId: null,
+                isSaving: false 
+            });
+            return { success: true };
+        } catch (err) {
+            const msg = err.response?.data?.message || "Failed to clear remote workspace ✕";
+            set({ isSaving: false, diagramError: msg });
+            return { success: false, error: msg };
+        }
+    },
+
+    // --- AUTO LAYOUT ALGORITHM ENGINE ---
     autoLayout: async () => {
         const { nodes, edges, reactFlowInstance } = get();
         if (nodes.length === 0) return;
@@ -168,17 +263,5 @@ export const useDiagramStore = create((set, get) => ({
         } catch (error) {
             console.error("The ELK Dynamic Rearrangement layout grid pass failed:", error);
         }
-    },
-
-    deleteNode: (nodeToDelete) => {
-        set({
-            nodes: get().nodes.filter((node) => node.id !== nodeToDelete),
-            edges: get().edges.filter((edge) => edge.source !== nodeToDelete && edge.target !== nodeToDelete),
-            selectedNodeId: get().selectedNodeId === nodeToDelete ? null : get().selectedNodeId
-        })
-    },
-    deleteEdge: (edgeIdToDelete) => {
-        set({ edges: get().edges.filter((edge) => edge.id !== edgeIdToDelete) })
-    },
-    deleteAll: () => { set({ nodes: [], edges: [], selectedNodeId: null }) }
-}))
+    }
+}));

@@ -3,26 +3,47 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import Addnode from '../components/Addnode'
 
 const Playground = () => {
-    const { addNode, deleteAll, autoLayout, selectedNodeId, nodes, updateNodeData, setSelectedNodeId } = useDiagramStore()
-    const [data, setData] = useState('')
+    // ⚡ EXTRACT DATABASE PERSISTENCE FIELDS ALONGSIDE BASE OPERATIONS
+    const { 
+        addNode, 
+        deleteAll, 
+        autoLayout, 
+        selectedNodeId, 
+        nodes, 
+        updateNodeData, 
+        setSelectedNodeId,
+        saveDiagram,           // 💾 Database Save Action
+        fetchDiagram,          // 📥 Database Load Action
+        clearBackendWorkspace, // 🗑️ Database Wipe Action
+        isSaving,              // 🔄 Background Saving Tracker
+        isFetching,            // 🔄 Background Fetching Tracker
+        diagramError           // 🚨 Error Handler Reference
+    } = useDiagramStore()
+
+    const [data, useStateField] = useState('')
     const [description, setDescription] = useState('')
+
+    // 📥 STEP 1: DOWNSTREAM SYNC UPON MOUNTING
+    useEffect(() => {
+        fetchDiagram()
+    }, [fetchDiagram])
 
     // Sync input fields whenever the active node selection changes on canvas
     const activeNode = nodes.find(n => n.id === selectedNodeId)
 
     useEffect(() => {
         if (activeNode) {
-            setData(activeNode.data.label || '')
+            useStateField(activeNode.data.label || '')
             setDescription(activeNode.data.description || '')
         } else {
-            setData('')
+            useStateField('')
             setDescription('')
         }
     }, [selectedNodeId, activeNode])
 
     // Handle mutations on the input fields
     const handleLabelChange = (value) => {
-        setData(value)
+        useStateField(value)
         if (selectedNodeId) {
             updateNodeData(selectedNodeId, { label: value })
         }
@@ -39,13 +60,13 @@ const Playground = () => {
         const finalLabel = data.trim() !== '' ? data : 'No label 🤔'
         addNode(finalLabel, description.trim())
         
-        setData('')
+        useStateField('')
         setDescription('')
         setSelectedNodeId(null)
     }
 
     const handleDeselect = () => {
-        setData('')
+        useStateField('')
         setDescription('')
         setSelectedNodeId(null)
     }
@@ -80,6 +101,13 @@ const Playground = () => {
                         )}
                     </div>
 
+                    {/* 🚨 BRUTALIST STORE ERROR ALERT POPUP */}
+                    {diagramError && (
+                        <div className="bg-red-500 text-white border-4 border-black p-2.5 text-[10px] font-black uppercase tracking-wide shadow-[4px_4px_0px_0px_#000000]">
+                            {diagramError}
+                        </div>
+                    )}
+
                     {/* Node Label Input */}
                     <div className="flex flex-col gap-2">
                         <label className="text-xs font-black uppercase tracking-wider text-black">
@@ -104,7 +132,7 @@ const Playground = () => {
                             value={description}
                             onChange={(e) => handleDescriptionChange(e.target.value)}
                             placeholder="Type block notes or description..."
-                            rows={10}
+                            rows={6} 
                             className="w-full bg-white border-4 border-black p-2.5 md:p-3 text-sm font-bold shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-yellow-50 transition-all placeholder:text-zinc-400 resize-none"
                         />
                     </div>
@@ -125,6 +153,15 @@ const Playground = () => {
                     {/* Horizontal Divider Line */}
                     <hr className="border-t-4 border-black my-2" />
 
+                    {/* 💾 THE SYSTEM PERSISTENCE CONTROL (SAVE ARCHITECTURE) */}
+                    <button
+                        onClick={saveDiagram}
+                        disabled={isSaving}
+                        className="w-full text-xs font-black uppercase tracking-wider bg-yellow-300 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center disabled:opacity-50"
+                    >
+                        {isSaving ? "Saving Backup... ⏳" : "Save Architecture 💾"}
+                    </button>
+
                     {/* Utility Controls */}
                     <button
                         onClick={autoLayout}
@@ -134,7 +171,7 @@ const Playground = () => {
                     </button>
 
                     <button
-                        onClick={deleteAll}
+                        onClick={clearBackendWorkspace} 
                         className="w-full text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                     >
                         Clear Canvas ✕
@@ -143,6 +180,14 @@ const Playground = () => {
 
                 {/* 🗺️ SYSTEM GRAPH VIEWPORT MAP */}
                 <div className='w-full md:w-[75%] h-[calc(100vh-380px)] md:h-screen bg-[#FEFCE8] relative z-10' >
+                    {isFetching ? (
+                        /* Full screen loading block overlaying canvas area during downstream downloads */
+                        <div className="absolute inset-0 bg-[#FEFCE8] flex items-center justify-center z-50 select-none">
+                            <div className="border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_#000000] font-black uppercase tracking-wider text-sm animate-pulse">
+                                Downloading Node Layout Coordinates... 📂
+                            </div>
+                        </div>
+                    ) : null}
                     <Addnode />
                 </div>
 
