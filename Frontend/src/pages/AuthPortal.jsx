@@ -26,31 +26,34 @@ const AuthPortal = () => {
 
     // ⚡ Catches the result after the browser redirects back from Google
     useEffect(() => {
-        const handleRedirectResult = async () => {
-            try {
-                const res = await getRedirectResult(auth);
-                if (res) {
-                    setIsGoogleLoading(true);
-                    const user = res.user;
-                    const result = await googleAuth(user.displayName, user.email);
+    const handleRedirectResult = async () => {
+        try {
+            console.log("Checking redirect result...");
+            const res = await getRedirectResult(auth);
+            console.log("Redirect result:", res);
+            if (res) {
+                setIsGoogleLoading(true);
+                const user = res.user;
+                console.log("Google user:", user.displayName, user.email);
+                const result = await googleAuth(user.displayName, user.email);
+                console.log("googleAuth store result:", result);
 
-                    if (result?.success) {
-                        brutalToast("Google Auth Successful ✓", "success");
-                        navigate("/");
-                    } else {
-                        brutalToast("Google Auth Failed ✕", "error");
-                    }
+                if (result?.success) {
+                    brutalToast("Google Auth Successful ✓", "success");
+                    navigate("/");
+                } else {
+                    brutalToast("Google Auth Failed ✕", "error");
                 }
-            } catch (error) {
-                console.error(error);
-                brutalToast("Google Auth Failed ✕", "error");
-            } finally {
-                setIsGoogleLoading(false);
             }
-        };
-        handleRedirectResult();
-    }, []);
-
+        } catch (error) {
+            console.error("Redirect error:", error);
+            brutalToast("Google Auth Failed ✕", "error");
+        } finally {
+            setIsGoogleLoading(false);
+        }
+    };
+    handleRedirectResult();
+}, []);
     const handleSubmit = async (e) => {
         e.preventDefault();
 
