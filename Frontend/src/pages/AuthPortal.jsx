@@ -53,8 +53,8 @@ const AuthPortal = () => {
             const name = User.displayName;
             const email = User.email;
 
-            googleAuth(name, email)
-            if (success) {
+            const result = await googleAuth(name, email)
+            if (result && result.success) {
                 console.log('google auth successfull')
             }
             navigate("/")

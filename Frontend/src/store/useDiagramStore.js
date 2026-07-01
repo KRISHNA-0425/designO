@@ -1,9 +1,9 @@
-import { addEdge, applyEdgeChanges, applyNodeChanges } from '@xyflow/react';
+import { addEdge, applyEdgeChanges, applyNodeChanges, MarkerType } from '@xyflow/react';
 import { create } from 'zustand';
-import ELK from 'elkjs/lib/elk.bundled.js';
 import API from '../api/axios'; // Linked to your custom Axios utility
 
-const elk = new ELK();
+const HORIZONTAL_GAP = 180;
+const VERTICAL_GAP = 60;
 
 export const useDiagramStore = create((set, get) => ({
     // --- STATE FIELDS ---
@@ -38,9 +38,20 @@ export const useDiagramStore = create((set, get) => ({
     onConnect: (connection) => {
         const customizedEdge = {
             ...connection,
-            animated: true,
+            type: 'smoothstep',
+            animated:true,
             selectable: true,
-            style: { stroke: '#000000', strokeWidth: 3 },
+            style: {
+                stroke: '#000000',
+                strokeWidth: 2.5,
+                strokeDasharray: '6,4',
+            },
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+                color: '#000000',
+            },
         };
         set({ edges: addEdge(customizedEdge, get().edges) })
     },
@@ -135,11 +146,9 @@ export const useDiagramStore = create((set, get) => ({
     saveDiagram: async () => {
         set({ isSaving: true, diagramError: null });
         try {
-            // Grab the absolute absolute current states using get() explicitly
             const currentNodes = get().nodes || [];
             const currentEdges = get().edges || [];
             
-            // ⚡ FORCE STRICT ARRAY FALLBACK VALUES BEFORE TRANSMITTING
             const payload = {
                 nodes: Array.isArray(currentNodes) ? currentNodes : [],
                 edges: Array.isArray(currentEdges) ? currentEdges : []
@@ -169,7 +178,6 @@ export const useDiagramStore = create((set, get) => ({
                 isFetching: false
             });
 
-            // Automatically recalibrate active view boundaries
             const instance = get().reactFlowInstance;
             if (instance && res.data.nodes?.length > 0) {
                 setTimeout(() => instance.fitView({ padding: 0.2, duration: 400 }), 100);
@@ -188,7 +196,6 @@ export const useDiagramStore = create((set, get) => ({
         try {
             await API.delete('/node/delete');
             
-            // Wipe client state locally too
             set({ 
                 nodes: [], 
                 edges: [], 
@@ -203,65 +210,148 @@ export const useDiagramStore = create((set, get) => ({
         }
     },
 
-    // --- AUTO LAYOUT ALGORITHM ENGINE ---
-    autoLayout: async () => {
+    // --- AUTO LAYOUT ALGORITHM ENGINE (custom Sugiyama-style layered layout) ---
+    autoLayout: () => {
         const { nodes, edges, reactFlowInstance } = get();
         if (nodes.length === 0) return;
 
-        const graph = {
-            id: "root",
-            layoutOptions: {
-                "elk.algorithm": "layered",
-                "elk.direction": "RIGHT",
-                "elk.layered.spacing.nodeNodeBetweenLayers": "180",
-                "elk.spacing.nodeNode": "100",
-                "elk.layered.spacing.edgeNodeBetweenLayers": "60",
-                "elk.padding": "[top=100,left=100,bottom=100,right=100]" 
-            },
-            children: nodes.map((node) => ({
-                id: node.id,
-                width: node.style?.width || 200,   
-                height: node.style?.height || 150, 
-            })),
-            edges: edges.map((edge) => ({
-                id: edge.id,
-                sources: [edge.source],
-                targets: [edge.target],
-            })),
-        };
+        const nodeWidth = (n) => n.style?.width || 200;
+        const nodeHeight = (n) => n.style?.height || 150;
 
-        try {
-            const layoutGraph = await elk.layout(graph);
+        // Build adjacency maps
+        const outgoing = {}; // id -> [targetIds]
+        const incoming = {}; // id -> [sourceIds]
+        nodes.forEach(n => { outgoing[n.id] = []; incoming[n.id] = []; });
+        edges.forEach(e => {
+            if (outgoing[e.source] && incoming[e.target]) {
+                outgoing[e.source].push(e.target);
+                incoming[e.target].push(e.source);
+            }
+        });
 
-            const layoutNodes = nodes.map((node) => {
-                const elkNode = layoutGraph.children.find((child) => child.id === node.id);
-                return {
-                    ...node,
-                    position: { x: elkNode.x, y: elkNode.y },
-                    style: { ...node.style, transition: 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)' }
-                };
+        // --- STEP 1: Assign layers (x-axis) via longest path from roots ---
+        const layer = {};
+        nodes.forEach(n => { layer[n.id] = 0; });
+
+        let changed = true;
+        let iterations = 0;
+        const maxIterations = nodes.length + 5; // guards against cycles
+        while (changed && iterations < maxIterations) {
+            changed = false;
+            iterations++;
+            edges.forEach(e => {
+                if (layer[e.source] === undefined || layer[e.target] === undefined) return;
+                if (layer[e.target] < layer[e.source] + 1) {
+                    layer[e.target] = layer[e.source] + 1;
+                    changed = true;
+                }
+            });
+        }
+
+        // Group nodes by layer
+        const layerGroups = {};
+        nodes.forEach(n => {
+            const l = layer[n.id];
+            if (!layerGroups[l]) layerGroups[l] = [];
+            layerGroups[l].push(n.id);
+        });
+        const sortedLayerKeys = Object.keys(layerGroups).map(Number).sort((a, b) => a - b);
+
+        // --- STEP 2: Order nodes within each layer via barycenter of parents ---
+        const orderIndex = {};
+        nodes.forEach((n, i) => { orderIndex[n.id] = i; });
+
+        layerGroups[sortedLayerKeys[0]].sort((a, b) => orderIndex[a] - orderIndex[b]);
+        layerGroups[sortedLayerKeys[0]].forEach((id, idx) => { orderIndex[id] = idx; });
+
+        for (let i = 1; i < sortedLayerKeys.length; i++) {
+            const layerKey = sortedLayerKeys[i];
+            const group = layerGroups[layerKey];
+
+            const barycenters = {};
+            group.forEach(id => {
+                const parents = incoming[id].filter(p => layer[p] < layerKey);
+                barycenters[id] = parents.length > 0
+                    ? parents.reduce((sum, p) => sum + orderIndex[p], 0) / parents.length
+                    : orderIndex[id];
             });
 
-            set({ nodes: layoutNodes });
-
-            if (reactFlowInstance) {
-                setTimeout(() => {
-                    reactFlowInstance.fitView({
-                        duration: 700, 
-                        padding: 0.35,  
-                        includeHiddenNodes: false
-                    });
-                }, 50);
-            }
-
-            setTimeout(() => {
-                set({
-                    nodes: get().nodes.map(n => ({ ...n, style: { ...n.style, transition: undefined } }))
-                });
-            }, 750);
-
-        } catch (error) {
-            console.error("The ELK Dynamic Rearrangement layout grid pass failed:", error);
+            group.sort((a, b) => barycenters[a] - barycenters[b]);
+            group.forEach((id, idx) => { orderIndex[id] = idx; });
         }
+
+        // --- STEP 3: X position per layer (left → right) ---
+        const layerX = {};
+        let cumulativeX = 0;
+        sortedLayerKeys.forEach((layerKey) => {
+            layerX[layerKey] = cumulativeX;
+            const maxWidthInLayer = Math.max(
+                ...layerGroups[layerKey].map(id => nodeWidth(nodes.find(n => n.id === id)))
+            );
+            cumulativeX += maxWidthInLayer + HORIZONTAL_GAP;
+        });
+
+        // --- STEP 4: Initial Y position per layer, stacked top → bottom in order ---
+        const positions = {};
+        sortedLayerKeys.forEach((layerKey) => {
+            const group = [...layerGroups[layerKey]].sort((a, b) => orderIndex[a] - orderIndex[b]);
+            let cumulativeY = 0;
+            group.forEach((id) => {
+                const node = nodes.find(n => n.id === id);
+                const h = nodeHeight(node);
+                positions[id] = { x: layerX[layerKey], y: cumulativeY };
+                cumulativeY += h + VERTICAL_GAP;
+            });
+        });
+
+        // --- STEP 5: Straighten pure 1-in/1-out chains, resolve overlaps by nudging down ---
+        for (let i = 1; i < sortedLayerKeys.length; i++) {
+            const layerKey = sortedLayerKeys[i];
+            const group = [...layerGroups[layerKey]].sort((a, b) => orderIndex[a] - orderIndex[b]);
+
+            let lastBottom = -Infinity;
+            group.forEach((id) => {
+                const parents = incoming[id];
+                const node = nodes.find(n => n.id === id);
+                const h = nodeHeight(node);
+
+                let desiredY = positions[id].y;
+
+                // Straight-line rule: single parent that has only this one child
+                if (parents.length === 1 && outgoing[parents[0]].length === 1) {
+                    desiredY = positions[parents[0]].y;
+                }
+
+                const minY = lastBottom === -Infinity ? desiredY : lastBottom + VERTICAL_GAP;
+                const finalY = Math.max(desiredY, minY);
+
+                positions[id] = { x: positions[id].x, y: finalY };
+                lastBottom = finalY + h;
+            });
+        }
+
+        const layoutNodes = nodes.map((node) => ({
+            ...node,
+            position: positions[node.id] || node.position,
+            style: { ...node.style, transition: 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)' }
+        }));
+
+        set({ nodes: layoutNodes });
+
+        if (reactFlowInstance) {
+            setTimeout(() => {
+                reactFlowInstance.fitView({
+                    duration: 700, 
+                    padding: 0.35,  
+                    includeHiddenNodes: false
+                });
+            }, 50);
+        }
+
+        setTimeout(() => {
+            set({
+                nodes: get().nodes.map(n => ({ ...n, style: { ...n.style, transition: undefined } }))
+            });
+        }, 750);
     }
 }));

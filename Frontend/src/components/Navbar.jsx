@@ -20,7 +20,7 @@ const Navbar = () => {
                         <HiOutlineCode size={20} className="text-black" />
                     </div>
                     <span className="text-xl font-black uppercase tracking-tighter text-black">
-                        ArchNote <span className="text-xs bg-black text-white px-1.5 py-0.5 ml-1">v1.0</span>
+                        Design <span className="text-xs bg-black text-white px-1.5 py-0.5 ml-1">v1.0</span>
                     </span>
                 </Link>
 

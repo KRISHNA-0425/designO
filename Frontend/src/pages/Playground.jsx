@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useDiagramStore } from '../store/useDiagramStore'
 import Addnode from '../components/Addnode'
+import { useNavigate } from 'react-router-dom'
+import { HiOutlineCode } from "react-icons/hi"
 
 const Playground = () => {
     // ⚡ EXTRACT DATABASE PERSISTENCE FIELDS ALONGSIDE BASE OPERATIONS
-    const { 
-        addNode, 
-        deleteAll, 
-        autoLayout, 
-        selectedNodeId, 
-        nodes, 
-        updateNodeData, 
+    const {
+        addNode,
+        deleteAll,
+        autoLayout,
+        selectedNodeId,
+        nodes,
+        updateNodeData,
         setSelectedNodeId,
         saveDiagram,           // 💾 Database Save Action
         fetchDiagram,          // 📥 Database Load Action
@@ -22,6 +24,8 @@ const Playground = () => {
 
     const [data, useStateField] = useState('')
     const [description, setDescription] = useState('')
+
+    const navigate = useNavigate()
 
     // 📥 STEP 1: DOWNSTREAM SYNC UPON MOUNTING
     useEffect(() => {
@@ -59,7 +63,7 @@ const Playground = () => {
     const handleCreateNode = () => {
         const finalLabel = data.trim() !== '' ? data : 'No label 🤔'
         addNode(finalLabel, description.trim())
-        
+
         useStateField('')
         setDescription('')
         setSelectedNodeId(null)
@@ -85,14 +89,22 @@ const Playground = () => {
 
                 {/* 💻 CONTROL SIDEBAR PANEL */}
                 <div className='w-full md:w-[25%] h-auto min-h-[220px] md:h-screen bg-amber-100 flex flex-col items-stretch justify-start p-4 md:p-6 border-b-4 md:border-b-0 md:border-r-4 border-black gap-4 select-none z-20 overflow-y-auto' >
-                    
-                    {/* Mode Status Badge Header Context */}
+
+                    {/* 🔧 FIXED: CLEAN UNIFIED NEO-BRUTALIST NAVIGATION LINK */}
+                    <button 
+                        onClick={() => navigate("/")} 
+                        className="w-full flex items-center justify-center gap-3 bg-cyan-300 text-black border-4 border-black p-2.5 font-black uppercase text-xs shadow-[4px_4px_0px_0px_#000000] hover:bg-yellow-300 transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] cursor-pointer"
+                    >
+                        <HiOutlineCode size={18} />
+                        <span>Return to Hub ➔</span>
+                    </button>
+
                     <div className="flex items-center justify-between mt-2">
                         <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000000] ${selectedNodeId ? 'bg-cyan-300 text-black' : 'bg-white text-black'}`}>
                             Mode: {selectedNodeId ? 'Editing Selected' : 'Create Mode'}
                         </span>
                         {selectedNodeId && (
-                            <button 
+                            <button
                                 onClick={handleDeselect}
                                 className="text-[10px] font-black uppercase bg-white border-2 border-black px-1.5 py-0.5 hover:bg-black hover:text-white transition-all cursor-pointer"
                             >
@@ -132,7 +144,7 @@ const Playground = () => {
                             value={description}
                             onChange={(e) => handleDescriptionChange(e.target.value)}
                             placeholder="Type block notes or description..."
-                            rows={6} 
+                            rows={6}
                             className="w-full bg-white border-4 border-black p-2.5 md:p-3 text-sm font-bold shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-yellow-50 transition-all placeholder:text-zinc-400 resize-none"
                         />
                     </div>
@@ -171,7 +183,7 @@ const Playground = () => {
                     </button>
 
                     <button
-                        onClick={clearBackendWorkspace} 
+                        onClick={clearBackendWorkspace}
                         className="w-full text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                     >
                         Clear Canvas ✕

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Background, Controls, ReactFlow, Handle, Position, NodeResizer } from '@xyflow/react'
+import { Background, Controls, ReactFlow, Handle, Position, NodeResizer, MarkerType } from '@xyflow/react'
 import { useDiagramStore } from '../store/useDiagramStore'
 import '@xyflow/react/dist/style.css'
 import { MdDeleteForever } from "react-icons/md";
@@ -12,11 +12,11 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
         <>
             {/* 📐 Stark Transform Handler: Only visible when this card is actively selected */}
             <NodeResizer
-                isVisible={selected} 
+                isVisible={selected}
                 minWidth={180}
                 minHeight={120}
-                lineClassName="!border-black !border-2 !cursor-pointer" 
-                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white !cursor-pointer" 
+                lineClassName="!border-black !border-2 !cursor-pointer"
+                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white !cursor-pointer"
                 onResize={(event, params) => {
                     useDiagramStore.getState().onNodeResize(id, {
                         width: params.width,
@@ -27,37 +27,37 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
 
             {/* FLUID INNER WRAPPER CELL */}
             <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
-                
+
                 {/* 🔴 LEFT BLACK HANDLE */}
-                <Handle 
-                    type="target" 
-                    position={Position.Left} 
-                    id="black-left" 
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="black-left"
                     isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
-                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] z-50 !cursor-pointer" 
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] z-50 !cursor-pointer"
                 />
                 {/* 🟢 LEFT LIME HANDLE */}
-                <Handle 
-                    type="source" 
-                    position={Position.Left} 
-                    id="lime-left" 
-                    className="!bg-lime-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] !top-[35%] z-50 !cursor-pointer" 
+                <Handle
+                    type="source"
+                    position={Position.Left}
+                    id="lime-left"
+                    className="!bg-lime-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] !top-[35%] z-50 !cursor-pointer"
                 />
 
                 {/* 🔴 RIGHT BLACK HANDLE */}
-                <Handle 
-                    type="target" 
-                    position={Position.Right} 
-                    id="black-right" 
+                <Handle
+                    type="target"
+                    position={Position.Right}
+                    id="black-right"
                     isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
-                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] z-50 !cursor-pointer" 
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] z-50 !cursor-pointer"
                 />
                 {/* 🟢 RIGHT EMERALD HANDLE */}
-                <Handle 
-                    type="source" 
-                    position={Position.Right} 
-                    id="emerald-right" 
-                    className="!bg-emerald-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] !top-[65%] z-50 !cursor-pointer" 
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="emerald-right"
+                    className="!bg-emerald-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] !top-[65%] z-50 !cursor-pointer"
                 />
 
                 {/* ⚡ TITLE LAYER HEADER */}
@@ -81,7 +81,7 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
                 {/* ATOMIC INLINE CARD DELETE TRASH TRIGGER */}
                 <button
                     onClick={(e) => {
-                        e.stopPropagation() 
+                        e.stopPropagation()
                         deleteNode(id)
                     }}
                     className="absolute bottom-2 right-2 bg-red-500 text-white border-2 border-black p-1 flex items-center justify-center transition-all hover:bg-black cursor-pointer z-30"
@@ -94,8 +94,21 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
 }
 
 const defaultEdgeOptions = {
+    type: 'smoothstep',
     selectable: true,
-    style: { stroke: '#000000', strokeWidth: 3, cursor: 'pointer' }
+    animated: true,
+    style: {
+        stroke: '#000000',
+        strokeWidth: 2.5,
+        strokeDasharray: '6,4',
+        cursor: 'pointer',
+    },
+    markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: '#000000',
+    },
 };
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
@@ -140,15 +153,12 @@ const Addnode = () => {
                 onEdgeClick={(event, edge) => {
                     deleteEdge(edge.id);
                 }}
-                onNodeDragStop={() => {
-                    saveDiagram(); // Auto-saves absolute grid coordinates to MongoDB when dragging drops
-                }}
                 defaultEdgeOptions={defaultEdgeOptions}
-                
+
                 // 🔒 PASS THE LOGIC GATEKEEPER INTERCEPTOR PROP HERE:
                 isValidConnection={checkValidConnection}
-                
-                connectionMode="loose" 
+
+                connectionMode="loose"
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
                 fitView
             >
