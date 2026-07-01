@@ -1,4 +1,4 @@
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { auth, provider } from '../utils/firebase';
@@ -16,12 +16,40 @@ const AuthPortal = () => {
     const [password, setPassword] = useState('');
     const [name, setUsername] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
             navigate("/")
         }
     }, [isAuthenticated])
+
+    // ⚡ Catches the result after the browser redirects back from Google
+    useEffect(() => {
+        const handleRedirectResult = async () => {
+            try {
+                const res = await getRedirectResult(auth);
+                if (res) {
+                    setIsGoogleLoading(true);
+                    const user = res.user;
+                    const result = await googleAuth(user.displayName, user.email);
+
+                    if (result?.success) {
+                        brutalToast("Google Auth Successful ✓", "success");
+                        navigate("/");
+                    } else {
+                        brutalToast("Google Auth Failed ✕", "error");
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                brutalToast("Google Auth Failed ✕", "error");
+            } finally {
+                setIsGoogleLoading(false);
+            }
+        };
+        handleRedirectResult();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,37 +73,8 @@ const AuthPortal = () => {
         }
     }
 
-    const handleGoogleAuth = async () => {
-        try {
-            const res = await signInWithPopup(auth, provider);
-            const user = res.user;
-            const result = await googleAuth(user.displayName, user.email);
-
-            if (result?.success) {
-                brutalToast("Google Auth Successful ✓", "success");
-                navigate("/");
-            } else {
-                brutalToast("Google Auth Failed ✕", "error");
-            }
-        } catch (error) {
-            console.error(error);
-
-            // ⚡ SPECIFIC ERROR HANDLING: Give the user an actionable message per failure type
-            switch (error.code) {
-                case 'auth/popup-blocked':
-                    brutalToast("Popup Blocked — Allow Popups & Retry ✕", "error");
-                    break;
-                case 'auth/popup-closed-by-user':
-                case 'auth/cancelled-popup-request':
-                    // User closed the popup themselves — no need to show an error
-                    break;
-                case 'auth/unauthorized-domain':
-                    brutalToast("This Domain Isn't Authorized For Google Auth ✕", "error");
-                    break;
-                default:
-                    brutalToast("Google Auth Failed ✕", "error");
-            }
-        }
+    const handleGoogleAuth = () => {
+        signInWithRedirect(auth, provider);
     };
 
     return (
@@ -183,7 +182,8 @@ const AuthPortal = () => {
                         <button
                             type="button"
                             onClick={handleGoogleAuth}
-                            className="w-full flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest bg-white text-black border-4 border-black p-3.5 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
+                            disabled={isGoogleLoading}
+                            className="w-full flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest bg-white text-black border-4 border-black p-3.5 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center disabled:opacity-50"
                         >
                             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -191,7 +191,7 @@ const AuthPortal = () => {
                                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                             </svg>
-                            <span>{isLogin ? 'Continue with Google' : 'Sign up with Google'}</span>
+                            <span>{isGoogleLoading ? 'Verifying...' : (isLogin ? 'Continue with Google' : 'Sign up with Google')}</span>
                         </button>
 
                     </form>
