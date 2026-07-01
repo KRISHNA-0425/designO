@@ -27,17 +27,22 @@ app.use('/api/auth', authRouter);
 app.use("/api/node", nodeRouter)
 
 const startServer = async () => {
-
     try {
-        await connectDb()
-        console.log("db connected");
+        console.log("Establishing database handshake... 🔄");
+        await connectDb();
+        console.log("MongoDB Connection Secured! ✅");
 
-        app.listen(port, () => { console.log((`server is running at port: ${port}`)) });
+        app.listen(port, () => { 
+            console.log(`Server executing smoothly on channel :${port} 🏁`) 
+        });
 
     } catch (error) {
-        console.log(error)
+        console.error("CRITICAL SERVER INITIALIZATION ABORTED ✕:");
+        console.error(error);
+        
+        // 🏁 Force the nodemon process to completely shut down on failure
+        process.exit(1); 
     }
-
 }
 
 startServer();

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Background, Controls, ReactFlow, Handle, Position, NodeResizer } from '@xyflow/react'
+import { Background, Controls, ReactFlow, Handle, Position, NodeResizer, MarkerType } from '@xyflow/react'
 import { useDiagramStore } from '../store/useDiagramStore'
 import '@xyflow/react/dist/style.css'
 import { MdDeleteForever } from "react-icons/md";
@@ -12,11 +12,11 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
         <>
             {/* Stark Transform Handler: Only visible when this card is actively selected */}
             <NodeResizer
-                isVisible={selected} 
+                isVisible={selected}
                 minWidth={180}
                 minHeight={120}
-                lineClassName="!border-black !border-2 !cursor-pointer" 
-                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white !cursor-pointer" 
+                lineClassName="!border-black !border-2 !cursor-pointer"
+                handleClassName="!bg-black !w-2.5 !h-2.5 !rounded-none !border-2 !border-white !cursor-pointer"
                 onResize={(event, params) => {
                     useDiagramStore.getState().onNodeResize(id, {
                         width: params.width,
@@ -26,59 +26,38 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
             />
 
             {/* FLUID INNER WRAPPER CELL */}
-            <div 
-                style={{ backgroundColor: data.bg || '#ffffff' }}
-                className={`w-full h-full p-4 pb-12 border-4 border-black font-mono relative transition-all flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible shadow-[4px_4px_0px_0px_#000000] ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4] !border-cyan-400' : ''}`}
-            >
+            <div className={`w-full h-full p-4 pb-12 border-4 border-black bg-white font-mono relative transition-all hover:bg-yellow-50 flex flex-col items-stretch justify-start text-left !cursor-pointer overflow-visible ${selected ? 'shadow-[4px_4px_0px_0px_#06b6d4]' : 'shadow-[4px_4px_0px_0px_#000000]'}`}>
                 
-                {/* ⬆️ TOP CARDINAL HANDLE */}
-                <Handle 
-                    type="target" 
-                    position={Position.Top} 
-                    id="black-top" 
-                    isConnectableStart={true}
-                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !top-[-8px] !left-[50%] -translate-x-1/2 z-50 !cursor-pointer" 
-                />
-
-                {/* ⬇️ BOTTOM CARDINAL HANDLE */}
-                <Handle 
-                    type="target" 
-                    position={Position.Bottom} 
-                    id="black-bottom" 
-                    isConnectableStart={true}
-                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !bottom-[-8px] !left-[50%] -translate-x-1/2 z-50 !cursor-pointer" 
-                />
-
-                {/* ⬅️ LEFT CARDINAL SYSTEM */}
+                {/* 🔴 LEFT BLACK HANDLE */}
                 <Handle 
                     type="target" 
                     position={Position.Left} 
                     id="black-left" 
-                    isConnectableStart={true}
-                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !left-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] z-50 !cursor-pointer" 
                 />
-                {/* ⚡ HIDDEN ALIAS HUB: Resolves old cache strings from throwing canvas errors */}
+                {/* 🟢 LEFT LIME HANDLE */}
                 <Handle 
                     type="source" 
                     position={Position.Left} 
                     id="lime-left" 
-                    className="!opacity-0 !w-0 !h-0 !absolute !left-0 !top-[50%] !pointer-events-none" 
+                    className="!bg-lime-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !left-[-8px] !top-[35%] z-50 !cursor-pointer" 
                 />
 
-                {/* ➡️ RIGHT CARDINAL SYSTEM */}
+                {/* 🔴 RIGHT BLACK HANDLE */}
                 <Handle 
                     type="target" 
                     position={Position.Right} 
                     id="black-right" 
-                    isConnectableStart={true}
-                    className="!bg-black !border-2 !border-black !w-3 !h-3 !rounded-none !right-[-8px] !top-[50%] -translate-y-1/2 z-50 !cursor-pointer" 
+                    isConnectableStart={true} // ⚡ Allows drawing connection wires OUT of this target handle
+                    className="!bg-black !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] z-50 !cursor-pointer" 
                 />
-                {/* ⚡ HIDDEN ALIAS HUB: Resolves old cache strings from throwing canvas errors */}
+                {/* 🟢 RIGHT EMERALD HANDLE */}
                 <Handle 
                     type="source" 
                     position={Position.Right} 
                     id="emerald-right" 
-                    className="!opacity-0 !w-0 !h-0 !absolute !right-0 !top-[50%] !pointer-events-none" 
+                    className="!bg-emerald-400 !border-2 !border-black !w-2.5 !h-2.5 !rounded-none !right-[-8px] !top-[65%] z-50 !cursor-pointer" 
                 />
 
                 {/* TITLE LAYER HEADER */}
@@ -102,7 +81,7 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
                 {/* ATOMIC INLINE CARD DELETE TRASH TRIGGER */}
                 <button
                     onClick={(e) => {
-                        e.stopPropagation() 
+                        e.stopPropagation()
                         deleteNode(id)
                     }}
                     className="absolute bottom-2 right-2 bg-red-500 text-white border-2 border-black p-1 flex items-center justify-center transition-all hover:bg-black cursor-pointer z-30"
@@ -117,13 +96,9 @@ const CustomBrutalistNode = ({ id, data, selected }) => {
 // Default layout configurations matching your uniform store blueprint styles
 const defaultEdgeOptions = {
     type: 'smoothstep',
+    animated:true,
     selectable: true,
-    style: { 
-        stroke: '#000000', 
-        strokeWidth: 3, 
-        strokeDasharray: '6,6', 
-        cursor: 'pointer' 
-    }
+    style: { stroke: '#000000', strokeWidth: 3, cursor: 'pointer' }
 };
 
 // 2. PRIMARY VIEWPORT CONTAINER CANVAS
@@ -156,11 +131,12 @@ const Addnode = () => {
                 onEdgeClick={(event, edge) => {
                     deleteEdge(edge.id);
                 }}
-                onNodeDragStop={() => {
-                    saveDiagram();
-                }}
+                
                 defaultEdgeOptions={defaultEdgeOptions}
+                
+                // 🔒 PASS THE LOGIC GATEKEEPER INTERCEPTOR PROP HERE:
                 isValidConnection={checkValidConnection}
+                
                 connectionMode="loose" 
                 className="[&_.react-flow__pane]:!cursor-grab [&_.react-flow__pane:active]:!cursor-grabbing"
                 fitView
