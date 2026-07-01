@@ -4,6 +4,7 @@ import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { auth, provider } from '../utils/firebase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate } from 'react-router-dom'
+import { brutalToast } from '../components/BrutalistToast';
 
 const AuthPortal = () => {
 
@@ -25,44 +26,40 @@ const AuthPortal = () => {
         }
     }, [isAuthenticated])
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (isLogin) {
-            // console.log("Logging in with standard credentials:", { email, password });
-            const result = login(email, password);
-            if (result.success) {
-                console.log('user logged')
+            const result = await login(email, password);
+            if (result?.success) {
+                brutalToast("User Logged In ✓", "success");
+                navigate("/");
+            } else {
+                brutalToast("Unable to Login ✕", "error");
             }
         } else {
-            // console.log("Registering with standard credentials:", { name, email, password });
-            const result = register(name, email, password);
-            if (result.success) {
-                console.log('user registered')
+            const result = await register(name, email, password);
+            if (result?.success) {
+                brutalToast("User Registered +", "success");
+                setIsLogin(true);
+            } else {
+                brutalToast("Registration Failed ✕", "error");
             }
         }
-    };
+    }
 
     const handleGoogleAuth = async () => {
-
         try {
             const res = await signInWithPopup(auth, provider);
-            // console.log(res)
+            const user = res.user;
+            await googleAuth(user.displayName, user.email);
 
-            const User = res.user;
-
-            const name = User.displayName;
-            const email = User.email;
-
-            const result = await googleAuth(name, email)
-            if (result && result.success) {
-                console.log('google auth successfull')
-            }
-            navigate("/")
-
+            brutalToast("Google Auth Successful ✓", "success");
+            navigate("/");
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            brutalToast("Google Auth Failed ✕", "error");
         }
-
     };
 
     return (

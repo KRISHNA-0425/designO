@@ -3,6 +3,7 @@ import { useDiagramStore } from '../store/useDiagramStore'
 import Addnode from '../components/Addnode'
 import { useNavigate } from 'react-router-dom'
 import { HiOutlineCode } from "react-icons/hi"
+import { brutalToast } from '../components/BrutalistToast'
 
 const Playground = () => {
     // ⚡ EXTRACT DATABASE PERSISTENCE FIELDS ALONGSIDE BASE OPERATIONS
@@ -14,12 +15,12 @@ const Playground = () => {
         nodes,
         updateNodeData,
         setSelectedNodeId,
-        saveDiagram,           // 💾 Database Save Action
-        fetchDiagram,          // 📥 Database Load Action
-        clearBackendWorkspace, // 🗑️ Database Wipe Action
-        isSaving,              // 🔄 Background Saving Tracker
-        isFetching,            // 🔄 Background Fetching Tracker
-        diagramError           // 🚨 Error Handler Reference
+        saveDiagram,           
+        fetchDiagram,          
+        clearBackendWorkspace, 
+        isSaving,              
+        isFetching,            
+        diagramError           
     } = useDiagramStore()
 
     const [data, useStateField] = useState('')
@@ -61,8 +62,16 @@ const Playground = () => {
     }
 
     const handleCreateNode = () => {
-        const finalLabel = data.trim() !== '' ? data : 'No label 🤔'
+        const finalLabel = data.trim()
+        
+        // 🚨 Stop empty nodes from cluttering the canvas viewport
+        if (finalLabel === '') {
+            brutalToast("Node content label cannot be empty! 🤔", "error") 
+            return
+        }
+
         addNode(finalLabel, description.trim())
+        brutalToast("Node added to canvas +", "info") 
 
         useStateField('')
         setDescription('')
@@ -79,6 +88,24 @@ const Playground = () => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             if (!selectedNodeId) handleCreateNode()
+        }
+    }
+
+    // Async click wrapper for database persistence loops
+    const handleSaveDiagram = async () => {
+        const result = await saveDiagram()
+        if (result?.success) {
+            brutalToast("Architecture saved to cloud 💾", "success") 
+        } else {
+            brutalToast(result?.error || "Failed to save backup ✕", "error") 
+        }
+    }
+
+    // Async click wrapper for database wipe workflows
+    const handleClearWorkspace = async () => {
+        const result = await clearBackendWorkspace()
+        if (result?.success) {
+            brutalToast("Canvas cleared securely ✕", "error") 
         }
     }
 
@@ -167,7 +194,7 @@ const Playground = () => {
 
                     {/* 💾 THE SYSTEM PERSISTENCE CONTROL (SAVE ARCHITECTURE) */}
                     <button
-                        onClick={saveDiagram}
+                        onClick={handleSaveDiagram}
                         disabled={isSaving}
                         className="w-full text-xs font-black uppercase tracking-wider bg-yellow-300 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center disabled:opacity-50"
                     >
@@ -176,14 +203,17 @@ const Playground = () => {
 
                     {/* Utility Controls */}
                     <button
-                        onClick={autoLayout}
+                        onClick={() => {
+                            autoLayout()
+                            brutalToast("Graph Rearranged ✨", "info")
+                        }}
                         className="w-full text-xs font-black uppercase tracking-wider bg-cyan-300 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                     >
                         Auto Arrange ✨
                     </button>
 
                     <button
-                        onClick={clearBackendWorkspace}
+                        onClick={handleClearWorkspace}
                         className="w-full text-xs font-black uppercase tracking-wider bg-red-500 text-white border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                     >
                         Clear Canvas ✕

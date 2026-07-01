@@ -5,6 +5,7 @@ import Homepage from './pages/Homepage'
 import AuthPortal from './pages/AuthPortal'
 import { useAuthStore } from './store/useAuthStore'
 import Navbar from './components/Navbar'
+import { Toaster } from 'react-hot-toast'
 
 const App = () => {
 
@@ -12,7 +13,7 @@ const App = () => {
 
   return (
     <>
-    {/* <Navbar/> */}
+      <Toaster />
       <Routes>
         <Route path='/' element={<Homepage />} />
         <Route path="/auth" element={<AuthPortal />} />

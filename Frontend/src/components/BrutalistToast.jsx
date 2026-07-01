@@ -1,30 +1,43 @@
-import React from 'react';
 import toast from 'react-hot-toast';
 
+/**
+ * 🎨 Centralized Custom Neo-Brutalist Toast Component
+ * @param {string} message - Feedback message text to show
+ * @param {'success' | 'error' | 'info'} type - Custom style type selector
+ */
 export const brutalToast = (message, type = 'success') => {
-    toast.custom((t) => (
-        <div
-            className={`${
-                t.visible ? 'animate-enter' : 'animate-leave'
-            } max-w-md w-full bg-white border-4 border-black p-4 font-mono text-xs font-black uppercase tracking-widest shadow-[6px_6px_0px_0px_#000000] flex items-center justify-between pointer-events-auto transition-all`}
-        >
-            <div className="flex items-center gap-3">
-                <span 
-                    className={`inline-block w-4 h-4 border-2 border-black shadow-[2px_2px_0px_0px_#000000] ${
-                        type === 'error' ? 'bg-red-500' : 'bg-emerald-400'
-                    }`} 
-                />
-                <p className={type === 'error' ? 'text-black' : 'text-black'}>
-                    {message}
-                </p>
-            </div>
-            
-            <button
-                onClick={() => toast.dismiss(t.id)}
-                className="ml-4 border-2 border-black px-1.5 py-0.5 bg-yellow-300 font-bold hover:bg-black hover:text-white transition-all text-[10px] cursor-pointer shadow-[2px_2px_0px_0px_#000000]"
+    // Determine high-contrast neon backgrounds based on execution state
+    const bgColors = {
+        success: '#6ee7b7', // Emerald-300
+        error: '#f87171',   // Red-400
+        info: '#38bdf8',    // Sky-300
+    };
+
+    const icons = {
+        success: '✓',
+        error: '✕',
+        info: '✨',
+    };
+
+    return toast.custom(
+        (t) => (
+            <div
+                className={`
+                    border-4 border-black p-4 flex items-center gap-3 font-mono text-xs font-black uppercase tracking-wider text-black
+                    transition-all duration-300 transform shadow-[4px_4px_0px_0px_#000000]
+                    ${t.visible ? 'animate-enter opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+                `}
+                style={{ background: bgColors[type] || bgColors.success }}
             >
-                ✕
-            </button>
-        </div>
-    ), { duration: 2500 });
+                <span className="text-sm bg-black text-white w-5 h-5 flex items-center justify-center border border-black font-bold">
+                    {icons[type]}
+                </span>
+                <div>{message}</div>
+            </div>
+        ),
+        {
+            duration: 3000,
+            position: 'top-right',
+        }
+    );
 };
