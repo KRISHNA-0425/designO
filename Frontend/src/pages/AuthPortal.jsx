@@ -15,13 +15,10 @@ const AuthPortal = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setUsername] = useState('');
-
-    // ⚡ NEW ACCESSIBILITY STATE: Controls the hidden/visible string parameter switch
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
-            console.log("User successfully verified! ");
             navigate("/")
         }
     }, [isAuthenticated])
@@ -52,20 +49,38 @@ const AuthPortal = () => {
         try {
             const res = await signInWithPopup(auth, provider);
             const user = res.user;
-            await googleAuth(user.displayName, user.email);
+            const result = await googleAuth(user.displayName, user.email);
 
-            brutalToast("Google Auth Successful ✓", "success");
-            navigate("/");
+            if (result?.success) {
+                brutalToast("Google Auth Successful ✓", "success");
+                navigate("/");
+            } else {
+                brutalToast("Google Auth Failed ✕", "error");
+            }
         } catch (error) {
             console.error(error);
-            brutalToast("Google Auth Failed ✕", "error");
+
+            // ⚡ SPECIFIC ERROR HANDLING: Give the user an actionable message per failure type
+            switch (error.code) {
+                case 'auth/popup-blocked':
+                    brutalToast("Popup Blocked — Allow Popups & Retry ✕", "error");
+                    break;
+                case 'auth/popup-closed-by-user':
+                case 'auth/cancelled-popup-request':
+                    // User closed the popup themselves — no need to show an error
+                    break;
+                case 'auth/unauthorized-domain':
+                    brutalToast("This Domain Isn't Authorized For Google Auth ✕", "error");
+                    break;
+                default:
+                    brutalToast("Google Auth Failed ✕", "error");
+            }
         }
     };
 
     return (
         <div className="min-h-screen w-full bg-[#222222] font-mono flex flex-col md:flex-row items-stretch overflow-x-hidden">
 
-            {/* VISUAL MATRIX SIDEBAR PANEL (ONE HALF) */}
             <div className="w-full md:w-1/2 bg-black flex flex-col items-center justify-center p-8 text-center border-b-4 md:border-b-0 md:border-r-4 border-black select-none gap-6 min-h-[300px] md:min-h-screen">
                 <h1 className="text-4xl lg:text-7xl font-black uppercase text-white tracking-tighter">
                     {isLogin ? 'Welcome Back' : 'Join Us Here'}
@@ -76,11 +91,10 @@ const AuthPortal = () => {
                         : 'Create your credential mapping tokens and start nesting customizable nodes.'}
                 </p>
 
-                {/* STATE SWITCH TOGGLE TRIGGER CONTROL */}
                 <button
                     onClick={() => {
                         setIsLogin(!isLogin);
-                        setShowPassword(false); // Reset eye vector visibility when swapping between forms
+                        setShowPassword(false);
                     }}
                     className="mt-4 text-xs font-black uppercase tracking-widest bg-yellow-300 text-black border-4 border-black px-6 py-3 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-white hover:text-black hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer"
                 >
@@ -88,7 +102,6 @@ const AuthPortal = () => {
                 </button>
             </div>
 
-            {/* INTERACTIVE FORM HUB PANEL (THE OTHER HALF) */}
             <div className="w-full md:w-1/2 bg-[#F7F7DD]/90 flex flex-col items-center justify-center p-6 md:p-12 min-h-[550px] md:min-h-screen">
                 <div className="w-full max-w-md bg-[#F7F7DD] border-4 border-black p-6 md:p-8 shadow-[8px_8px_0px_0px_#000000]">
 
@@ -98,7 +111,6 @@ const AuthPortal = () => {
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-                        {/* CONDITIONAL FIELD: USERNAME ONLY FOR REGISTRATION */}
                         {!isLogin && (
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs font-black uppercase tracking-wider text-black">
@@ -115,7 +127,6 @@ const AuthPortal = () => {
                             </div>
                         )}
 
-                        {/* EMAIL ADDRESS INPUT FIELD */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-black uppercase tracking-wider text-black">
                                 Email Address:
@@ -130,16 +141,13 @@ const AuthPortal = () => {
                             />
                         </div>
 
-                        {/* PASSWORD INPUT FIELD WITH INTEGRATED REACT-ICON TOGGLE */}
                         <div className="flex flex-col gap-1.5 mb-2">
                             <label className="text-xs font-black uppercase tracking-wider text-black">
                                 Security Password:
                             </label>
 
-                            {/* ⚡ THE FIX CONTAINER: Made position 'relative' to anchor the absolute eye switch button */}
                             <div className="w-full relative flex items-stretch">
                                 <input
-                                    // Dynamically toggles field behavior between text mask string and password dots string mapping
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -148,7 +156,6 @@ const AuthPortal = () => {
                                     className="w-full bg-white border-4 border-black p-3 pr-14 text-sm font-bold shadow-[4px_4px_0px_0px_#000000] focus:outline-none focus:bg-yellow-50 transition-all placeholder:text-zinc-400"
                                 />
 
-                                {/* 👁️ INTERACTIVE EYE TOGGLE ICON TRIGGER */}
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -160,7 +167,6 @@ const AuthPortal = () => {
                             </div>
                         </div>
 
-                        {/* MASTER FORM SUBMIT BUTTON */}
                         <button
                             type="submit"
                             className="w-full text-xs font-black uppercase tracking-widest bg-orange-500 text-black border-4 border-black p-3.5 mt-2 shadow-[4px_4px_0px_0px_#000000] transition-all hover:bg-black hover:text-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
@@ -168,14 +174,12 @@ const AuthPortal = () => {
                             {isLogin ? 'Authenticate Access ✓' : 'Register Account +'}
                         </button>
 
-                        {/* OR SEPARATION BREAK LINE */}
                         <div className="flex items-center justify-center my-2 gap-3 select-none">
                             <div className="h-1 bg-black flex-grow"></div>
                             <span className="text-xs font-black text-black uppercase tracking-wider">OR</span>
                             <div className="h-1 bg-black flex-grow"></div>
                         </div>
 
-                        {/* NEO-BRUTALIST GOOGLE SIGNUP/LOGIN BUTTON */}
                         <button
                             type="button"
                             onClick={handleGoogleAuth}
