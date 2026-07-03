@@ -14,11 +14,11 @@ const Footer = () => {
                 {/* 🎨 BRAND COLUMN BLOCK */}
                 <div className="flex flex-col items-start gap-3 max-w-sm">
                     <div className="flex items-center gap-2">
-                        <div className="bg-yellow-300 p-1.5 border-2 border-white text-black shadow-[2px_2px_0px_0px_#ffffff]">
-                            <HiOutlineCode size={18} />
-                        </div>
-                        <span className="text-lg font-black uppercase tracking-tighter text-white">
-                            ArchNote // CORE
+
+                        <img src="https://res.cloudinary.com/dflf8j84g/image/upload/v1783102931/favicon_kltkho.svg" alt="website logo" className='size-12' />
+
+                        <span className="text-xl font-black uppercase tracking-tighter ">
+                            DesignO <span className="text-xs bg-white text-black px-1.5 py-0.5 ml-1">v1.0</span>
                         </span>
                     </div>
                     <p className="text-[11px] font-bold text-zinc-400 leading-normal">
@@ -40,14 +40,7 @@ const Footer = () => {
                     >
                         Workspace Board
                     </Link>
-                    <a
-                        href="https://reactflow.dev/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-zinc-400 hover:text-yellow-300 transition-colors duration-200"
-                    >
-                        XyFlow Engine v12
-                    </a>
+                    
                 </div>
 
                 {/* ⚡ UTILITY ACTUATOR: BACK TO TOP BUTTON */}

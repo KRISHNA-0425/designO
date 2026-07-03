@@ -19,7 +19,7 @@ const Navbar = () => {
                     <img src="https://res.cloudinary.com/dflf8j84g/image/upload/v1783102931/favicon_kltkho.svg" alt="website logo" className='size-12' />
 
                     <span className="text-xl font-black uppercase tracking-tighter text-black">
-                        Design <span className="text-xs bg-black text-white px-1.5 py-0.5 ml-1">v1.0</span>
+                        DesignO <span className="text-xs bg-black text-white px-1.5 py-0.5 ml-1">v1.0</span>
                     </span>
                 </Link>
 
