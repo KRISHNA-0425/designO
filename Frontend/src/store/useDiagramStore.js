@@ -174,7 +174,7 @@ export const useDiagramStore = create((set, get) => ({
     fetchDiagram: async () => {
         set({ isFetching: true, diagramError: null });
         try {
-            const res = await API.get('/node');
+            const res = await API.get('/node', { withCredentials: true });
 
             set({
                 nodes: res.data.nodes || [],
