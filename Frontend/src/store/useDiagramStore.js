@@ -143,7 +143,7 @@ export const useDiagramStore = create((set, get) => ({
     // --- BACKEND DATABASE REST CHANNELS ---
 
     // 1. SAVE CANVAS (POST to /node/save)
-    // ⚡ This is only ever triggered manually — by the "Save Architecture" button in Playground.jsx.
+    // This is only ever triggered manually — by the "Save Architecture" button in Playground.jsx.
     // No other action in this store or in components calls this automatically.
     saveDiagram: async () => {
         set({ isSaving: true, diagramError: null });
@@ -158,7 +158,7 @@ export const useDiagramStore = create((set, get) => ({
                 edges: Array.isArray(currentEdges) ? currentEdges : []
             };
 
-            const res = await API.post('/node/save', payload, { withCredentials: ture });
+            const res = await API.post('/node/save', payload, { withCredentials: true });
 
             set({ isSaving: false });
             return { success: true };
