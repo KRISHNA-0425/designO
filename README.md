@@ -1,4 +1,12 @@
-# Designing.io 🎨
+# 🎨 Designing.io - Neo-Brutalist Architecture Sandbox
+
+<p align="center">
+  <img src="https://img.shields.io/badge/MERN%20Stack-Ready-blue?style=for-the-badge&logo=react" alt="MERN Stack" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/React_Flow-Interactive-FF007F?style=for-the-badge" alt="React Flow" />
+  <img src="https://img.shields.io/badge/ELK.js-Auto_Layout-green?style=for-the-badge" alt="ELK.js" />
+  <img src="https://img.shields.io/badge/Zustand-State_Management-orange?style=for-the-badge" alt="Zustand" />
+</p>
 
 A high-performance full-stack web application designed as a fully functional, highly optimized Eraser.io clone. Built around a striking Neo-Brutalist design philosophy, this platform bridges the gap between technical system layouts and document tracking. It strips away smooth corporate curves, soft blurs, and gradients in favor of structural layouts, raw boundaries, and zero-blur drop shadows.
 
