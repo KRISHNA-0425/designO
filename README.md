@@ -1,153 +1,154 @@
-# 📟 designing.io — Neo-Brutalist Architecture Sandbox
-> **Version 1.0 (v1 Draft Specification)**  
-> *A high-contrast, orthogonal system diagramming & layout builder built on the MERN stack.*
+# Designing.io 🎨
 
----
+A high-performance full-stack web application designed as a fully functional, highly optimized Eraser.io clone. Built around a striking Neo-Brutalist design philosophy, this platform bridges the gap between technical system layouts and document tracking. It strips away smooth corporate curves, soft blurs, and gradients in favor of structural layouts, raw boundaries, and zero-blur drop shadows.
 
-## ⚡ Overview
-**designing.io** (also branded as **ArchNote**) is a specialized sandbox utility for visualizing, structuring, and auto-arranging large-scale system architectures. Built for engineers mapping microservices, pipelines, databases, and api gateways, it frees you from manually dragging boxes around. With an active auto-rearrange compiler and a full MERN persistence engine, your layouts are compiled, animated, and stored securely.
+## ✨ Features
 
----
+### 🏗️ System Redesign (Asynchronous Auto-Layout)
+Features a high-performance hierarchical grid alignment engine powered by [elkjs](https://github.com/kieler/elkjs) (Eclipse Layout Kernel). With a single click of the "Auto Arrange ✨" control button, messy or scattered architectural blocks instantly compute and snap into optimized layouts.
 
-## 🎨 Tech Stack & Dependencies
+### 📝 Note Per Block (Contextual Markdown)
+Users can attach deep architectural notes and explicit configurations directly inside any individual component card. Click on a block to reveal a slide-out sidebar editor that saves technical choices (e.g., specific algorithms or database choices) in real time.
 
-### Frontend (`/Frontend`)
-* **Core Framework**: React (v19) & Vite (v8)
-* **Design & Styling**: Tailwind CSS (v4) with custom Neo-Brutalist CSS configurations (stark borders, primary HSL alerts, thick shadows)
-* **Canvas Renderer**: `@xyflow/react` (React Flow v12) supporting orthodiagonal smoothstep paths, resizing, and cardinal handles
-* **Layout Engine**: Custom hierarchical layout algorithm with animated coordinate transition states
-* **State Management**: Zustand (v5) with LocalStorage cache persistence
-* **Notifications**: `react-hot-toast` custom-themed for Neo-Brutalist toast notifications
-* **Authentication**: Firebase Authentication (for Google Auth sign-in popup) & custom API tokens
+### 🛠️ Custom Omnidirectional Nodes (`brutalNode`)
+Implements custom canvas nodes using `@xyflow/react` that support target and source connection ports sitting on all four sides of the card. Each card also features integrated, isolated Hitbox actions like a localized block deletion toggle.
 
-### Backend (`/Backend`)
-* **Server Runtime**: Node.js & Express (v5)
-* **Database Object Modeling**: MongoDB & Mongoose (v9)
-* **Session Security**: JSON Web Tokens (`jsonwebtoken` v9), Cookie Parser, and `bcryptjs` (v3) password hashing
-* **Development Utility**: `nodemon` (v3) for real-time live reloading
+### 🛡️ Persistent Global Authentication
+Centralized session state powered by a custom Zustand store wrapped in the `persist` middleware layer. Sessions automatically survive canvas updates and hard page reloads through local disk caching configurations.
 
----
+### 🍞 Centralized Neo-Brutalist Toasts
+Styled notifications matching the stark identity tokens, driven library-free or customizable via `react-hot-toast` to handle asynchronous canvas operations and user login feedback cleanly.
 
-## 📂 Core Folder Structure
+### 🗄️ High-Frequency NoSQL Canvas Storage
+Backed by a flat document hierarchy database in MongoDB that maps the full interactive whiteboard elements 1:1, bypassing the need for complex, heavy multitable relational joins.
 
-```filepath
-desiging.io-final/
-├── Backend/
-│   ├── src/
-│   │   ├── config/          # MongoDB database connect wrappers
-│   │   ├── controllers/     # Controller modules for Auth and Nodes/Edges saving
-│   │   ├── middleware/      # Express authentication verification gates
-│   │   ├── models/          # Mongoose Schemas (User, Node, Edge)
-│   │   ├── routes/          # Express API route declarations
-│   │   └── server.js        # Server execution entry point
-│   ├── .env                 # Backend environment secrets
-│   └── package.json         # Backend manifest
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework:** React 19 + Vite
+- **Canvas Engine:** React Flow (`@xyflow/react`)
+- **Layout Math Engine:** elkjs (Eclipse Layout Kernel)
+- **State Management:** Zustand (with Persist Middleware)
+- **Styling:** TailwindCSS (Arbitrary tokens for hard-edged styling blocks)
+- **Routing:** React Router DOM
+- **Other Utilities:** `react-icons`, Axios Client Instance
+
+### Backend
+- **Runtime Environment:** Node.js & Express.js
+- **Database Layer:** MongoDB via Mongoose
+- **Authentication:** Firebase Admin SDK & secure server payload parsers
+- **Security & Infrastructure:** Native CORS handlers, cookie-parsers, and asynchronous route validation
+
+## 📁 Project Structure
+
+```plaintext
+designing.io/
 │
-└── Frontend/
-    ├── src/
-    │   ├── api/             # Axios API client instances
-    │   ├── components/      # UI components (Addnode, Navbar, Footer, BrutalistToast)
-    │   ├── pages/           # Pages (Homepage, AuthPortal, Playground)
-    │   ├── store/           # Zustand global state (useAuthStore, useDiagramStore)
-    │   ├── utils/           # Firebase client configurations
-    │   ├── App.css          # Core visual stylesheets
-    │   ├── App.jsx          # Route management Hub
-    │   └── main.jsx         # React mounting root
-    ├── .env                 # Frontend client configurations
-    └── package.json         # Frontend manifest
+├── Backend/                    # Express Server & REST Core Pipelines
+│   ├── src/
+│   │   ├── controllers/        # Business logic controllers (auth, node saves)
+│   │   ├── models/             # Mongoose schemas (Board and Node definitions)
+│   │   ├── routes/             # Express route registers (auth, node parameters)
+│   │   └── server.js           # Entry point for the server engine
+│   └── package.json
+│
+├── Frontend/                   # Vite + React Client
+│   ├── src/
+│   │   ├── components/         # Atomic UI items (Addnode, AuthPortal, CustomBrutalistNode)
+│   │   ├── pages/              # View wrappers (Homepage Landing, Infinite Playground)
+│   │   ├── store/              # Global Zustand state sheets (useAuthStore, useDiagramStore)
+│   │   ├── utils/              # Third-party script wrappers (Firebase, Axios instances)
+│   │   ├── App.jsx             # Main application router mount frame
+│   │   └── main.jsx            # Document root mount pipeline
+│   └── package.json
+│
+└── README.md                   # Project documentation
 ```
 
----
+## 🚀 Installation & Setup
 
-## 🔐 Environment Configurations
+### Prerequisites
+- Node.js (v24.x recommended)
+- MongoDB Atlas account (Free M0 cluster tier)
+- Firebase account for authentication configuration
 
-Ensure the following variables are defined in your workspace files before running local processes:
+### 1. Clone the Repository
+```bash
+git clone https://github.com/KRISHNA-0425/designing.io.git
+cd designing.io
+```
 
-### `/Backend/.env`
+### 2. Backend Setup
+Move into the backend architecture directory:
+```bash
+cd Backend
+```
+
+Install the necessary runtime packages:
+```bash
+npm install
+```
+
+Establish local network configurations by generating a `.env` file inside the `Backend/` folder:
 ```env
 PORT=3000
-MONGO_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/designing"
-JWT_SECRET="your_jwt_signature_secret_phrase"
-NODE_ENV="development"
-FRONTEND_URL="http://localhost:5173"
+MONGODB_URI=your_mongodb_atlas_srv_connection_string
+FRONTEND_URL=http://localhost:5173
+# Include your Firebase environment keys here
 ```
 
-### `/Frontend/.env`
+Fire up the development environment server:
+```bash
+npm run dev
+```
+
+### 3. Frontend Setup
+Open a separate terminal frame and jump inside the frontend subfolder:
+```bash
+cd Frontend
+```
+
+Install all frontend assets and framework packages:
+```bash
+npm install
+```
+
+Establish a `.env.production` or `.env` configuration file inside the `Frontend/` root tree path:
 ```env
-VITE_FIREBASE_API_KEY="your_firebase_api_key"
-VITE_FIREBASE_AUTH_DOMAIN="your_firebase_auth_domain"
-VITE_FIREBASE_PROJECT_ID="your_firebase_project_id"
-VITE_FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket"
-VITE_FIREBASE_MESSAGING_SENDER_ID="your_messaging_sender_id"
-VITE_FIREBASE_APP_ID="your_firebase_app_id"
-VITE_FIREBASE_MEASUREMENT_ID="your_measurement_id"
-
-VITE_BACKEND_URL="http://localhost:3000"
+VITE_BACKEND_URL=http://localhost:3000
+# Add your Firebase Web configuration SDK mappings here
 ```
 
----
-
-## 🏁 Local Installation Guide
-
-Follow these sequential steps to boot the local development environment:
-
-### Step 1: Database & Server Initialization
+Spin up the client sandbox environment locally:
 ```bash
-# Navigate to the backend directory
-cd Backend
-
-# Install dependencies
-npm install
-
-# Run backend development server (executes via nodemon on port :3000)
 npm run dev
 ```
 
-### Step 2: Client Sandbox Launch
-```bash
-# Navigate to the frontend directory
-cd ../Frontend
+Your infinite workspace blueprint landing grid will go live instantly on http://localhost:5173.
 
-# Install dependencies
-npm install
+## 🚀 Cloud Production Deployment
 
-# Launch frontend client dev server (executes via Vite on port :5173)
-npm run dev
-```
+### Backend Service (Hosted on Render)
+1. Go to your Render Dashboard and create a new Web Service linked to your Git repository.
+2. Define your subfolder requirements accurately inside the dashboard settings:
+   - **Root Directory:** `Backend`
+   - **Build Command:** `npm install`
+   - **Start Command:** `node src/server.js`
+3. Go to the Environment console tab, and add your cloud parameters (`MONGODB_URI` and `PORT = 10000`). Render allocates port 10000 automatically to process traffic securely.
 
----
+### Frontend Deployment (Hosted on Vercel)
+1. Add a project profile mapping on your Vercel Dashboard.
+2. Open your project settings configuration, edit the **Root Directory** option, and select the `Frontend` subfolder.
+3. Add your environment variables under the configuration dropdown, injecting your live backend Render link under the `VITE_BACKEND_URL` key.
+4. To ensure multi-page client-side paths work correctly upon reload without dropping `PAGE_NOT_FOUND` errors, add a `vercel.json` file at the root of your `Frontend/` folder:
+   ```json
+   {
+     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+   }
+   ```
 
-## 🔌 API Reference Table
+## 🤝 Contributing
+Contributions and structural suggestions are always welcome. Feel free to report issues, suggest custom node types, or submit pull requests to make this canvas architecture layout builder even more bulletproof!
 
-The following rest endpoints are exposed by the server to manage sessions and layout maps:
-
-| Domain | Method | Endpoint | Description | Payload Body Requirements |
-| :--- | :--- | :--- | :--- | :--- |
-| **Auth** | `POST` | `/api/auth/register` | Register a new user account | `{ name, email, password }` |
-| **Auth** | `POST` | `/api/auth/login` | Authenticate and sign user in | `{ email, password }` |
-| **Auth** | `POST` | `/api/auth/googleAuth` | Authenticate/Register via Google | `{ name, email }` |
-| **Auth** | `POST` | `/api/auth/logout` | Terminate cookies & session | *None (Clears Cookie)* |
-| **Node** | `POST` | `/api/node/save` | Backup active layout elements | `{ nodes: [], edges: [] }` |
-| **Node** | `GET` | `/api/node` | Retrieve coordinates for the user | *None (Reads authorization cookie)* |
-| **Node** | `DELETE` | `/api/node/delete` | Wipe user's entire remote layout | *None* |
-
----
-
-## 💾 Database Schema Design
-
-The workspace relies on three primary database collections:
-1. **User Schema**: Holds username string, unique email, hashed password, and googleAuth registration markers.
-2. **Node Schema**: Persists coordinates (`x`, `y`), dimensions (`width`, `height`), node types (`brutalNode`), labels, backgrounds, description notes, and owner linkages.
-3. **Edge Schema**: Stores graph connections between source nodes and target nodes, complete with edge IDs, styles, and animation properties.
-
----
-
-## 🛠️ Key Sandbox Features
-
-* **Instant Dynamic Layout Compiler**: Calculates optimal horizontal hierarchical layers (assigning layer indexes, resolving barycenters, stacking coordinates, and straightening orthogonal paths) automatically without overlapping nodes.
-* **Resizing Support**: Active node resizing uses a neo-brutalist border handler frame and saves changed dimensions directly to database models.
-* **Custom Toast Alert system**: `react-hot-toast` displays styling that is fully aligned with neo-brutalism, flashing error states and success notifications directly on user saves/clears.
-* **Google OAuth & Native Credentials**: Secure password encryption and stateless cookie-token storage.
-
----
-*Created by **Krishna Sinha**. licensed under ISC.*
+## 📝 License
+This project is licensed under the ISC License.
