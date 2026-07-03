@@ -5,31 +5,32 @@ dotenv.config();
 
 export const isAuth = async (req, res, next) => {
     try {
-        // token in the cookies
-        const token = req.cookies.token;
+        // Fallback: Check cookies FIRST, then check the Authorization Header
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
         if (!token) {
-            return res.status(400).json("please try to login")
+            // Consistent JSON structure object output
+            return res.status(400).json({ message: "please try to login" });
         }
 
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
         if (!decodedToken) {
-            return res.status(400).json("invalid token");
+            return res.status(400).json({ message: "invalid token" });
         }
 
-        const user = await User.findById(decodedToken.userId)
+        // Make sure your token generation uses 'userId' or '_id'
+        const user = await User.findById(decodedToken.userId || decodedToken._id);
 
         if (!user) {
-            return res.status(404).json("user not found");
+            return res.status(404).json({ message: "user not found" });
         }
 
         req.user = user;
-
         next();
 
     } catch (error) {
         console.error("Error in isAuth middleware:", error.message);
-        return res.status(500).json({ message: "Internal server error in authentication middleware" });
+        return res.status(401).json({ message: "Session expired or invalid token" });
     }
 }
