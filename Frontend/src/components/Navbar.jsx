@@ -16,10 +16,8 @@ const Navbar = () => {
                     to="/"
                     className="flex items-center gap-2 group cursor-pointer"
                 >
-                    <div className="bg-cyan-300 p-2 border-2 border-black shadow-[2px_2px_0px_0px_#000000] group-hover:bg-yellow-300 transition-all">
+                    <img src="../../public/favicon.svg" alt="website logo" />
 
-                        <img src="favicon.svg" alt="website logo" />
-                    </div>
                     <span className="text-xl font-black uppercase tracking-tighter text-black">
                         Design <span className="text-xs bg-black text-white px-1.5 py-0.5 ml-1">v1.0</span>
                     </span>
