@@ -10,8 +10,8 @@ export const useDiagramStore = create((set, get) => ({
     nodes: [],
     edges: [],
     reactFlowInstance: null,
-    selectedNodeId: null, 
-    
+    selectedNodeId: null,
+
     // Server Synchronization Sync States
     isSaving: false,
     isFetching: false,
@@ -24,8 +24,8 @@ export const useDiagramStore = create((set, get) => ({
     onNodesChange: (changes) => {
         const selectedId = get().selectedNodeId;
         const isDeleted = changes.some(c => c.type === 'remove' && c.id === selectedId);
-        
-        set({ 
+
+        set({
             nodes: applyNodeChanges(changes, get().nodes),
             selectedNodeId: isDeleted ? null : selectedId
         });
@@ -70,24 +70,24 @@ export const useDiagramStore = create((set, get) => ({
                 y: window.innerHeight / 2,
             });
             const jitter = (Math.random() - 0.5) * 40;
-            spawnX = center.x + jitter - 100; 
-            spawnY = center.y + jitter - 75;  
+            spawnX = center.x + jitter - 100;
+            spawnY = center.y + jitter - 75;
         }
 
         const newNode = {
             id: nodeId,
             type: 'brutalNode',
             style: { width: 200, height: 150 },
-            data: { 
+            data: {
                 label: customLabel,
-                description: description 
+                description: description
             },
             position: { x: spawnX, y: spawnY },
         };
 
-        set({ 
+        set({
             nodes: [...nodes, newNode],
-            selectedNodeId: nodeId 
+            selectedNodeId: nodeId
         });
     },
 
@@ -151,14 +151,14 @@ export const useDiagramStore = create((set, get) => ({
             // Grab the absolute absolute current states using get() explicitly
             const currentNodes = get().nodes || [];
             const currentEdges = get().edges || [];
-            
+
             // ⚡ FORCE STRICT ARRAY FALLBACK VALUES BEFORE TRANSMITTING
             const payload = {
                 nodes: Array.isArray(currentNodes) ? currentNodes : [],
                 edges: Array.isArray(currentEdges) ? currentEdges : []
             };
 
-            const res = await API.post('/node/save', payload);
+            const res = await API.post('/node/save', payload, { withCredentials: ture });
 
             set({ isSaving: false });
             return { success: true };
@@ -175,7 +175,7 @@ export const useDiagramStore = create((set, get) => ({
         set({ isFetching: true, diagramError: null });
         try {
             const res = await API.get('/node');
-            
+
             set({
                 nodes: res.data.nodes || [],
                 edges: res.data.edges || [],
@@ -200,13 +200,13 @@ export const useDiagramStore = create((set, get) => ({
         set({ isSaving: true, diagramError: null });
         try {
             await API.delete('/node/delete');
-            
+
             // Wipe client state locally too
-            set({ 
-                nodes: [], 
-                edges: [], 
+            set({
+                nodes: [],
+                edges: [],
                 selectedNodeId: null,
-                isSaving: false 
+                isSaving: false
             });
             return { success: true };
         } catch (err) {
@@ -349,8 +349,8 @@ export const useDiagramStore = create((set, get) => ({
         if (reactFlowInstance) {
             setTimeout(() => {
                 reactFlowInstance.fitView({
-                    duration: 700, 
-                    padding: 0.35,  
+                    duration: 700,
+                    padding: 0.35,
                     includeHiddenNodes: false
                 });
             }, 50);
