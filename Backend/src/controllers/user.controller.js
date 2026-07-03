@@ -50,7 +50,10 @@ export const register = async (req, res) => {
                 name: user.name,
                 id: user._id,
                 email: user.email
-            }
+            },
+            token:token,
+            success:true,
+            message:"User registered"
         });
 
     } catch (error) {
@@ -110,7 +113,9 @@ export const login = async (req, res) => {
                 name: existingUser.name,
                 email: existingUser.email
             },
-
+            token: token,
+            success: true,
+            message:"User logged In"
         });
 
     } catch (error) {
@@ -160,7 +165,7 @@ export const googleAuthController = async (req, res) => {
             sameSite: 'none'
         })
 
-        return res.status(200).json({ message: "user created", user })
+        return res.status(200).json({ message: "user created", user, token, success: true })
 
     } catch (error) {
         return res.status(500).json({ message: `internal server error in googleAuthController ${error}` })
