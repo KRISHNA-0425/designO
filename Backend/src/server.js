@@ -5,11 +5,15 @@ import connectDb from './config/db.js';
 import authRouter from './routes/auth.routes.js';
 import cookieParser from 'cookie-parser'
 import nodeRouter from './routes/nodes.routes.js';
+import job from './config/cronjob.js';
 dotenv.config();
 
 const port = process.env.PORT
 
 const app = express();
+
+job.start()
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
