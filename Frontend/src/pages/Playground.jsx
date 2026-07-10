@@ -66,7 +66,7 @@ const Playground = () => {
         
         // 🚨 Stop empty nodes from cluttering the canvas viewport
         if (finalLabel === '') {
-            brutalToast("Node content label cannot be empty! 🤔", "error") 
+            brutalToast("Node content label cannot be empty!", "error") 
             return
         }
 
@@ -95,7 +95,7 @@ const Playground = () => {
     const handleSaveDiagram = async () => {
         const result = await saveDiagram()
         if (result?.success) {
-            brutalToast("Architecture saved to cloud 💾", "success") 
+            brutalToast("Architecture saved to cloud", "success") 
         } else {
             brutalToast(result?.error || "Failed to save backup ✕", "error") 
         }
@@ -135,7 +135,7 @@ const Playground = () => {
                                 onClick={handleDeselect}
                                 className="text-[10px] font-black uppercase bg-white border-2 border-black px-1.5 py-0.5 hover:bg-black hover:text-white transition-all cursor-pointer"
                             >
-                                New Node ➕
+                                New Node
                             </button>
                         )}
                     </div>
@@ -185,7 +185,7 @@ const Playground = () => {
                         </button>
                     ) : (
                         <div className="text-[11px] font-bold text-zinc-600 bg-amber-200 border-2 border-dashed border-black p-2 mt-2 text-center rounded-none select-none">
-                            ✨ Changes update canvas node values in real-time!
+                            Changes update canvas node values in real-time!
                         </div>
                     )}
 
@@ -198,18 +198,18 @@ const Playground = () => {
                         disabled={isSaving}
                         className="w-full text-xs font-black uppercase tracking-wider bg-yellow-300 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center disabled:opacity-50"
                     >
-                        {isSaving ? "Saving Backup... ⏳" : "Save Architecture 💾"}
+                        {isSaving ? "Saving Backup..." : "Save Architecture"}
                     </button>
 
                     {/* Utility Controls */}
                     <button
                         onClick={() => {
                             autoLayout()
-                            brutalToast("Graph Rearranged ✨", "info")
+                            brutalToast("Graph Rearranged", "info")
                         }}
                         className="w-full text-xs font-black uppercase tracking-wider bg-cyan-300 text-black border-4 border-black p-2.5 md:p-3 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer text-center"
                     >
-                        Auto Arrange ✨
+                        Auto Arrange
                     </button>
 
                     <button
@@ -226,7 +226,7 @@ const Playground = () => {
                         /* Full screen loading block overlaying canvas area during downstream downloads */
                         <div className="absolute inset-0 bg-[#FEFCE8] flex items-center justify-center z-50 select-none">
                             <div className="border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_#000000] font-black uppercase tracking-wider text-sm animate-pulse">
-                                Downloading Node Layout Coordinates... 📂
+                                Downloading Node Layout Coordinates...
                             </div>
                         </div>
                     ) : null}

@@ -60,7 +60,7 @@ const DownloadButton = () => {
       // Stays aligned with your bold, interactive Neo-Brutalist design language
       className="absolute top-4 right-4 z-50 text-xs font-black uppercase tracking-wider bg-fuchsia-400 text-black border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000000] hover:bg-black hover:text-white transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none cursor-pointer"
     >
-      Export PNG 💾
+      Export PNG
     </button>
   );
 };

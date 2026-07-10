@@ -38,12 +38,12 @@ app.use("/api/node", nodeRouter)
 
 const startServer = async () => {
     try {
-        console.log("Establishing database handshake... 🔄");
+        console.log("Establishing database handshake...");
         await connectDb();
-        console.log("MongoDB Connection Secured! ✅");
+        console.log("MongoDB Connection Secured!");
 
         app.listen(port, () => { 
-            console.log(`Server executing smoothly on channel :${port} 🏁`) 
+            console.log(`Server executing smoothly on channel :${port}`) 
         });
 
     } catch (error) {

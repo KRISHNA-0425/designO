@@ -34,7 +34,6 @@ export const useAuthStore = create(
                 } catch (err) {
                     const errMsg = err.response?.data?.message || 'Registration failed ✕';
                     set({ isLoading: false, error: errMsg });
-                    console.log(errMsg)
                     return { success: false };
                 }
             },
@@ -56,7 +55,6 @@ export const useAuthStore = create(
                 } catch (err) {
                     const errMsg = err.response?.data?.message || 'Login failed ✕';
                     set({ isLoading: false, error: errMsg });
-                    console.log(errMsg)
                     return { success: false };
                 }
             },
@@ -68,7 +66,6 @@ export const useAuthStore = create(
                     await API.post('/auth/logout')
                 } catch (err) {
                     const errMsg = err.response?.data?.message || 'Logout failed ✕';
-                    console.log(errMsg)
                 } finally {
                     // Always reset local state fields safely
                     set({
@@ -99,7 +96,6 @@ export const useAuthStore = create(
                 } catch (err) {
                     const errMsg = err.response?.data?.message || 'Google Auth failed ✕';
                     set({ isLoading: false, error: errMsg });
-                    console.log(errMsg)
                     return { success: false };
                 }
             }

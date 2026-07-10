@@ -29,7 +29,7 @@ const Navbar = () => {
                         to="/playground"
                         className="text-sm font-black uppercase tracking-wide text-black hover:text-cyan-500 transition-all"
                     >
-                        Workspace 🛠️
+                        Workspace
                     </Link>
 
                     {/* DYNAMIC VISIBILITY SWITCH GATES */}
@@ -37,7 +37,7 @@ const Navbar = () => {
                         <div className="flex items-center gap-4">
                             {/* User Profile Identity Badge */}
                             <div className="hidden md:block bg-[#F7F7DD] border-2 border-black text-xs font-black uppercase px-3 py-1.5 shadow-[2px_2px_0px_0px_#000000]">
-                                User: {user.name || user.username} 👤
+                                User: {user.name || user.username}
                             </div>
 
                             {/* Neo-Brutalist Logout Trigger Link */}

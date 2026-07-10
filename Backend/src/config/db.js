@@ -14,8 +14,8 @@ const connectDb = async () => {
             serverSelectionTimeoutMS: 5000, // Drop and fail quickly instead of waiting 10s
         });
     } catch (error) {
-        console.error("❌ Mongoose Connection Handshake Failed!");
-        // 🚀 THE FIX: Throw the error so the main server block knows it failed!
+        console.error("Mongoose Connection Handshake Failed!");
+        // THE FIX: Throw the error so the main server block knows it failed!
         throw error; 
     }
 }

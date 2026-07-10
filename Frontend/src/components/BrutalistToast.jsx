@@ -16,7 +16,7 @@ export const brutalToast = (message, type = 'success') => {
     const icons = {
         success: '✓',
         error: '✕',
-        info: '✨',
+        info: 'i',
     };
 
     return toast.custom(
