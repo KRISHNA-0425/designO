@@ -1,6 +1,13 @@
 # 🎨 DesignO // Frontend System Board
 > **A Stark Neo-Brutalist Architecture Blueprint Sandbox & Diagram Canvas**
 
+<div align="left">
+  <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS v4" />
+  <img src="https://img.shields.io/badge/XYFlow-v12-FF007F?style=for-the-badge&logo=reactflow&logoColor=white" alt="XYFlow React" />
+</div>
+
 Welcome to **DesignO** (v1.0), an enterprise-grade canvas blueprint editor built with high-contrast, sharp Neo-Brutalist aesthetics. Engineered specifically to support massive system topologies, DesignO allows users to map out microservice diagrams, database relationships, and network flows without performance degradation or visual clutter.
 
 ---
@@ -22,19 +29,20 @@ Here is the key technology stack implemented across the DesignO client dashboard
 
 | ⚛️ React 19 & Vite 8 | 🎨 Tailwind CSS v4 |
 | :--- | :--- |
-| **Category**: Core Framework / Tooling <br>**Library**: `react` / `vite` <br>**Badges**: ![React](https://img.shields.io/badge/React-19-06B6D4?style=flat-square&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white) <br><br> Lightning-fast dev experience, HMR compilation, modular ES imports, and React 19 concurrent render features. | **Category**: Styling Engine <br>**Library**: `tailwindcss` / `@tailwindcss/vite` <br>**Badges**: ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white) <br><br> Custom styling utility framework implementing dark-framed borders, stark borders, high-contrast hover patterns, and responsive layouts. |
+| **Category**: Core Framework / Tooling <br>**Library**: `react` / `vite` <br>**Badges**:<br> <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" /> <br> <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" /> <br><br> Lightning-fast dev experience, HMR compilation, modular ES imports, and React 19 concurrent render features. | **Category**: Styling Engine <br>**Library**: `tailwindcss` / `@tailwindcss/vite` <br>**Badges**:<br> <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" /> <br><br> Custom styling utility framework implementing dark-framed borders, stark borders, high-contrast hover patterns, and responsive layouts. |
 
 | 🗺️ XYFlow React (React Flow 12) | 📦 Zustand State Store |
 | :--- | :--- |
-| **Category**: Node Map Canvas <br>**Library**: `@xyflow/react` <br>**Badges**: ![XYFlow](https://img.shields.io/badge/XYFlow-v12-FF007F?style=flat-square&logo=reactflow&logoColor=white) <br><br> Interactive graphical editor handling custom nodes, custom connections, snap handles, bounds checking, and canvas control buttons. | **Category**: State Management <br>**Library**: `zustand` <br>**Badges**: ![Zustand](https://img.shields.io/badge/Zustand-v5-4338CA?style=flat-square&logo=react&logoColor=white) <br><br> Minimal state container supporting data binding, async actions, and custom localStorage persistence with the namespace `'desiging'`. |
+| **Category**: Node Map Canvas <br>**Library**: `@xyflow/react` <br>**Badges**:<br> <img src="https://img.shields.io/badge/XYFlow-v12-FF007F?style=for-the-badge&logo=reactflow&logoColor=white" alt="XYFlow" /> <br><br> Interactive graphical editor handling custom nodes, custom connections, snap handles, bounds checking, and canvas control buttons. | **Category**: State Management <br>**Library**: `zustand` <br>**Badges**:<br> <img src="https://img.shields.io/badge/Zustand-v5-4338CA?style=for-the-badge&logo=react&logoColor=white" alt="Zustand" /> <br><br> Minimal state container supporting data binding, async actions, and custom localStorage persistence with the namespace `'desiging'`. |
 
 | 🔥 Firebase Authentication | 🧬 ElkJS Layout Engine |
 | :--- | :--- |
-| **Category**: Identity Management <br>**Library**: `firebase` <br>**Badges**: ![Firebase](https://img.shields.io/badge/Firebase-v12-FFCA28?style=flat-square&logo=firebase&logoColor=black) <br><br> Handles client-side identity authentication popups, Google OAuth, and secure profile credentials token bindings. | **Category**: Graph Mathematics <br>**Library**: `elkjs` <br>**Badges**: ![ElkJS](https://img.shields.io/badge/ElkJS-Layout-E0F2FE?style=flat-square&logo=javascript&logoColor=black) <br><br> Backs the auto-rearrange math equations, computing tree layers and coordinates for massive network topologies. |
+| **Category**: Identity Management <br>**Library**: `firebase` <br>**Badges**:<br> <img src="https://img.shields.io/badge/Firebase-v12-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" /> <br><br> Handles client-side identity authentication popups, Google OAuth, and secure profile credentials token bindings. | **Category**: Graph Mathematics <br>**Library**: `elkjs` <br>**Badges**:<br> <img src="https://img.shields.io/badge/ElkJS-Layout-E0F2FE?style=for-the-badge&logo=javascript&logoColor=black" alt="ElkJS" /> <br><br> Backs the auto-rearrange math equations, computing tree layers and coordinates for massive network topologies. |
 
 | 📸 HTML-to-Image Export | ⚡ Axios Interceptors |
 | :--- | :--- |
-| **Category**: Export Compiler <br>**Library**: `html-to-image` <br>**Badges**: ![html-to-image](https://img.shields.io/badge/HTML--To--Image-Export-10B981?style=flat-square) <br><br> DOM node parser compiling the active React Flow canvas elements into a downloadable base64 PNG data structure. | **Category**: HTTP Client Middleware <br>**Library**: `axios` <br>**Badges**: ![Axios](https://img.shields.io/badge/Axios-v1.18-5A29E4?style=flat-square&logo=axios&logoColor=white) <br><br> Central client instance incorporating a request interceptor to dynamically inject local auth bearer tokens into outgoing requests. |
+| **Category**: Export Compiler <br>**Library**: `html-to-image` <br>**Badges**:<br> <img src="https://img.shields.io/badge/HTML--to--Image-Export-10B981?style=for-the-badge&logo=image&logoColor=white" alt="html-to-image" /> <br><br> DOM node parser compiling the active React Flow canvas elements into a downloadable base64 PNG data structure. | **Category**: HTTP Client Middleware <br>**Library**: `axios` <br>**Badges**:<br> <img src="https://img.shields.io/badge/Axios-v1.18-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios" /> <br><br> Central client instance incorporating a request interceptor to dynamically inject local auth bearer tokens into outgoing requests. |
+
 
 ---
 
